@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Finansial 10/20/30/40</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .input-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        input[type="number"] {
+            padding: 12px;
+            width: 60%;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="number"]:focus {
+            border-color: #3498db;
+        }
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 600px) {
+            .grid-dashboard { grid-template-columns: 1fr; }
+        }
+        .card {
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+        }
+        .kebaikan { background-color: #17a2b8; }
+        .masa-depan { background-color: #20c997; }
+        .utang { background-color: #fd7e14; }
+        .kebutuhan { background-color: #ffc107; color: #333; }
+        
+        .card h3 { margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
+        .amount { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        ul { padding-left: 20px; margin-bottom: 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Prinsip 10/20/30/40</h1>
+    <h2>Pengelolaan Penghasilan</h2>
+    
+    <div class="input-section">
+        <label for="gaji" style="display:block; margin-bottom:8px; font-weight:bold;">Masukkan Gaji Bulanan Anda (Rp):</label>
+        <input type="number" id="gaji" placeholder="Contoh: 5000000" oninput="hitungFinansial()">
+    </div>
+
+    <div class="grid-dashboard">
+        <div class="card kebaikan">
+            <h3>10% - Kebaikan</h3>
+            <div class="amount" id="txt-kebaikan">Rp 0</div>
+            <ul>
+                <li>Zakat / Perpuluhan</li>
+                <li>Dana Sosial & Donasi</li>
+                <li>Bantuan Keluarga / Sedekah</li>
+            </ul>
+        </div>
+
+        <div class="card masa-depan">
+            <h3>20% - Masa Depan</h3>
+            <div class="amount" id="txt-masadepan">Rp 0</div>
+            <ul>
+                <li>Dana Darurat</li>
+                <li>Investasi & Tabungan</li>
+                <li>Asuransi</li>
+            </ul>
+        </div>
+
+        <div class="card utang">
+            <h3>Maksimal 30% - Utang</h3>
+            <div class="amount" id="txt-utang">Rp 0</div>
+            <ul>
+                <li>Cicilan Rumah / Apartemen</li>
+                <li>Cicilan Kendaraan</li>
+                <li>Utang Produktif</li>
+            </ul>
+        </div>
+
+        <div class="card kebutuhan">
+            <h3>40% - Kebutuhan</h3>
+            <div class="amount" id="txt-kebutuhan">Rp 0</div>
+            <ul>
+                <li>Biaya Rumah Tangga & Makan</li>
+                <li>Transportasi / Ongkos</li>
+                <li>Pulsa / Internet / Listrik</li>
+                <li>Pendidikan & Hiburan</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatRupiah(angka) {
+        return "Rp " + angka.toLocaleString('id-ID');
+    }
+
+    function hitungFinansial() {
+        const gaji = parseFloat(document.getElementById('gaji').value) || 0;
+
+        // Hitung Alokasi
+        const kebaikan = gaji * 0.10;
+        const masadepan = gaji * 0.20;
+        const utang = gaji * 0.30;
+        const kebutuhan = gaji * 0.40;
+
+        // Tampilkan ke UI
+        document.getElementById('txt-kebaikan').innerText = formatRupiah(kebaikan);
+        document.getElementById('txt-masadepan').innerText = formatRupiah(masadepan);
+        document.getElementById('txt-utang').innerText = formatRupiah(utang);
+        document.getElementById('txt-kebutuhan').innerText = formatRupiah(kebutuhan);
+    }
+</script>
+
+</body>
+</html>
