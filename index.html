@@ -42,6 +42,25 @@
             outline: none;
         }
         
+        /* Layout & Gaya Tombol Export Excel */
+        .action-bar {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .btn-export {
+            background-color: #217346; /* Warna Hijau Identitas Excel */
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: 0.2s;
+        }
+        .btn-export:hover { background-color: #1a5c38; }
+
         /* Layout untuk Chart Dashboard */
         .chart-container {
             max-width: 400px;
@@ -135,6 +154,10 @@
         <input type="number" id="gaji" value="5000000" oninput="updateAll()">
     </div>
 
+    <div class="action-bar">
+        <button class="btn-export" onclick="exportToExcel()">📊 Export ke Excel (.xls)</button>
+    </div>
+
     <div class="chart-container">
         <h3 style="text-align: center; margin-top: 0; color: #555;">Visualisasi Pengeluaran Aktual</h3>
         <canvas id="expenseChart"></canvas>
@@ -160,7 +183,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td>Total Kebaikan</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -184,7 +207,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td>Total Masa Depan</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -208,7 +231,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td>Total Utang</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -232,7 +255,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td>Total Kebutuhan</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -248,11 +271,10 @@
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
     }
 
-    // Fungsi menambah baris list baru secara manual
     function addRow(tableId) {
         const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
-        const row = table.insertRow(rowCount - 1); // Sisipkan tepat di atas baris total
+        const row = table.insertRow(rowCount - 1); 
 
         row.innerHTML = `
             <td><input type="text" class="input-table" placeholder="Nama item..."></td>
@@ -264,7 +286,6 @@
         updateAll();
     }
 
-    // Fungsi menghapus baris list pengeluaran
     function deleteRow(button) {
         const row = button.parentNode.parentNode;
         row.parentNode.removeChild(row);
@@ -320,7 +341,6 @@
         document.getElementById('limit-kebutuhan').innerText = formatRupiah(gaji * 0.4);
     }
 
-    // Fungsi menggambar dan meng-update Grafik Chart.js secara dinamis
     function updateChart(act1, act2, act3, act4) {
         const ctx = document.getElementById('expenseChart').getContext('2d');
         
@@ -355,8 +375,78 @@
         const actUtang = hitungKategori('table-utang');
         const actKebutuhan = hitungKategori('table-kebutuhan');
         
-        // Update grafik visualisasi dengan data aktual terbaru
         updateChart(actKebaikan, actMasaDepan, actUtang, actKebutuhan);
+    }
+
+    // FITUR BARU: Fungsi Ekstraksi Data & Download ke Excel
+    function exportToExcel() {
+        const gaji = document.getElementById('gaji').value;
+        let htmlTemplate = `
+            <table border="1">
+                <tr><th colspan="4" style="background-color:#217346; color:white; font-size:16px;">LAPORAN PERENCANAAN KEUANGAN 10/20/30/40</th></tr>
+                <tr><td colspan="2"><b>Total Gaji Bersih:</b></td><td colspan="2">Rp ${parseInt(gaji).toLocaleString('id-ID')}</td></tr>
+                <tr><td colspan="4"></td></tr>
+                <tr style="background-color:#f2f2f2;">
+                    <th>Item Pengeluaran</th>
+                    <th>Plan (Rp)</th>
+                    <th>Actual (Rp)</th>
+                    <th>Delta (Rp)</th>
+                </tr>
+        `;
+
+        const tables = ['table-kebaikan', 'table-masadepan', 'table-utang', 'table-kebutuhan'];
+        
+        tables.forEach(tableId => {
+            const table = document.getElementById(tableId);
+            
+            // Ambil seluruh data baris pengeluaran kustom dari pengguna
+            const rows = table.querySelectorAll('tbody tr:not(.total-row)');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const itemName = inputs[0].value;
+                const planVal = inputs[1].value;
+                const actualVal = inputs[2].value;
+                const deltaText = row.querySelector('.delta').innerText;
+
+                htmlTemplate += `
+                    <tr>
+                        <td>${itemName}</td>
+                        <td>${planVal}</td>
+                        <td>${actualVal}</td>
+                        <td>${deltaText}</td>
+                    </tr>
+                `;
+            });
+
+            // Ambil baris ringkasan total per blok alokasi
+            const totalRow = table.querySelector('.total-row');
+            const totalName = totalRow.cells[0].innerText;
+            const totalPlan = totalRow.querySelector('.total-plan').innerText;
+            const totalActual = totalRow.querySelector('.total-actual').innerText;
+            const totalDelta = totalRow.querySelector('.total-delta').innerText;
+
+            htmlTemplate += `
+                <tr style="font-weight:bold; background-color: #e6f2ff;">
+                    <td>${totalName}</td>
+                    <td>${totalPlan}</td>
+                    <td>${totalActual}</td>
+                    <td>${totalDelta}</td>
+                </tr>
+                <tr><td colspan="4"></td></tr>
+            `;
+        });
+
+        htmlTemplate += </table>;
+
+        // Eksekusi trigger download berkas spreadsheet (.xls)
+        const blob = new Blob([htmlTemplate], { type: 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Laporan_Keuangan_10_20_30_40.xls';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
     window.onload = function() {
