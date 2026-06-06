@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalkulator Finansial Pro Max 10/20/30/40</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -123,24 +122,6 @@
             cursor: pointer;
         }
         .btn-delete:hover { background-color: #c82333; }
-
-        /* Tambahan: Style Tombol Download Excel */
-        .excel-section {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .btn-excel {
-            background-color: #217346;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .btn-excel:hover { background-color: #154c2e; }
     </style>
 </head>
 <body>
@@ -152,10 +133,6 @@
     <div class="input-section">
         <label for="gaji" style="display:block; margin-bottom:8px; font-weight:bold;">Masukkan Total Gaji Bersih (Rp):</label>
         <input type="number" id="gaji" value="5000000" oninput="updateAll()">
-    </div>
-
-    <div class="excel-section">
-        <button class="btn-excel" onclick="downloadExcel()">📊 Download ke Excel</button>
     </div>
 
     <div class="chart-container">
@@ -323,4 +300,69 @@
         table.querySelector('.total-plan').innerText = formatRupiah(totalPlan);
         table.querySelector('.total-actual').innerText = formatRupiah(totalActual);
         
-        const
+        const totalDeltaCell = table.querySelector('.total-delta');
+        if (totalDelta >= 0) {
+            totalDeltaCell.innerText = "+ " + formatRupiah(totalDelta);
+            totalDeltaCell.className = "total-delta delta-positive";
+        } else {
+            totalDeltaCell.innerText = "- " + formatRupiah(totalDelta);
+            totalDeltaCell.className = "total-delta delta-negative";
+        }
+
+        return totalActual;
+    }
+
+    function updateLimits() {
+        const gaji = parseFloat(document.getElementById('gaji').value) || 0;
+        document.getElementById('limit-kebaikan').innerText = formatRupiah(gaji * 0.1);
+        document.getElementById('limit-masadepan').innerText = formatRupiah(gaji * 0.2);
+        document.getElementById('limit-utang').innerText = formatRupiah(gaji * 0.3);
+        document.getElementById('limit-kebutuhan').innerText = formatRupiah(gaji * 0.4);
+    }
+
+    // Fungsi menggambar dan meng-update Grafik Chart.js secara dinamis
+    function updateChart(act1, act2, act3, act4) {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        
+        if (myChart) {
+            myChart.data.datasets[0].data = [act1, act2, act3, act4];
+            myChart.update();
+        } else {
+            myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Kebaikan (10%)', 'Masa Depan (20%)', 'Utang (30%)', 'Kebutuhan (40%)'],
+                    datasets: [{
+                        data: [act1, act2, act3, act4],
+                        backgroundColor: ['#17a2b8', '#20c997', '#fd7e14', '#ffc107'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    }
+
+    function updateAll() {
+        updateLimits();
+        const actKebaikan = hitungKategori('table-kebaikan');
+        const actMasaDepan = hitungKategori('table-masadepan');
+        const actUtang = hitungKategori('table-utang');
+        const actKebutuhan = hitungKategori('table-kebutuhan');
+        
+        // Update grafik visualisasi dengan data aktual terbaru
+        updateChart(actKebaikan, actMasaDepan, actUtang, actKebutuhan);
+    }
+
+    window.onload = function() {
+        updateAll();
+    };
+</script>
+
+</body>
+</html>
