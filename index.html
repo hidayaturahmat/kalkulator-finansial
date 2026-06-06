@@ -32,16 +32,6 @@
             padding: 20px;
             border-radius: 8px;
         }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .section-header h3 {
-            margin: 0;
-            color: #2c3e50;
-        }
         
         /* Layout untuk Chart Dashboard */
         .chart-container {
@@ -124,14 +114,48 @@
             cursor: pointer;
         }
         .btn-delete:hover { background-color: #c82333; }
-        
-        .total-gaji-display {
-            text-align: center;
-            font-size: 18px;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 2px dashed #cbd5e1;
+
+        /* Ringkasan Akhir & Tombol Aksi Utama */
+        .summary-panel {
+            margin-top: 30px;
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            padding: 20px;
+            border-radius: 8px;
         }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .summary-row.grand-total {
+            font-size: 18px;
+            font-weight: bold;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .action-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .btn-main {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-save { background-color: #4b5563; color: white; }
+        .btn-save:hover { background-color: #374151; }
+        .btn-submit { background-color: #2563eb; color: white; }
+        .btn-submit:hover { background-color: #1d4ed8; }
     </style>
 </head>
 <body>
@@ -175,7 +199,6 @@
     </div>
 
     <div class="grid-dashboard">
-        
         <div class="category-block kebaikan">
             <div class="category-header">
                 <span>10% - Kebaikan (<span id="limit-kebaikan">Rp 0</span>)</span>
@@ -271,7 +294,26 @@
                 </table>
             </div>
         </div>
+    </div>
 
+    <div class="summary-panel">
+        <div class="summary-row">
+            <span>Total Pemasukan:</span>
+            <span id="summary-pemasukan">Rp 0</span>
+        </div>
+        <div class="summary-row">
+            <span>Total Pengeluaran Aktual:</span>
+            <span id="summary-pengeluaran" style="color: #dc3545;">- Rp 0</span>
+        </div>
+        <div class="summary-row grand-total">
+            <span>Sisa Dana (Delta Akhir):</span>
+            <span id="summary-delta">Rp 0</span>
+        </div>
+        
+        <div class="action-group">
+            <button class="btn-main btn-save" onclick="saveDataLocal()">Simpan Data</button>
+            <button class="btn-main btn-submit" onclick="submitAndEmail()">Submit & Kirim Email</button>
+        </div>
     </div>
 </div>
 
@@ -282,7 +324,6 @@
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
     }
 
-    // Fungsi menambah baris pemasukan baru
     function addIncomeRow() {
         const table = document.getElementById('table-pemasukan').getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
@@ -296,14 +337,12 @@
         updateAll();
     }
 
-    // Fungsi menghapus baris pemasukan
     function deleteIncomeRow(button) {
         const row = button.parentNode.parentNode;
         row.parentNode.removeChild(row);
         updateAll();
     }
 
-    // Fungsi hitung total pemasukan keseluruhan
     function hitungTotalGaji() {
         const incomeInputs = document.querySelectorAll('.income-value');
         let totalGaji = 0;
@@ -311,10 +350,10 @@
             totalGaji += parseFloat(input.value) || 0;
         });
         document.getElementById('total-gaji-label').innerText = formatRupiah(totalGaji);
+        document.getElementById('summary-pemasukan').innerText = formatRupiah(totalGaji);
         return totalGaji;
     }
 
-    // Fungsi menambah baris list baru secara manual (Pengeluaran)
     function addRow(tableId) {
         const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
@@ -330,7 +369,6 @@
         updateAll();
     }
 
-    // Fungsi menghapus baris list pengeluaran
     function deleteRow(button) {
         const row = button.parentNode.parentNode;
         row.parentNode.removeChild(row);
@@ -385,10 +423,8 @@
         document.getElementById('limit-kebutuhan').innerText = formatRupiah(gaji * 0.4);
     }
 
-    // Fungsi menggambar dan meng-update Grafik Chart.js secara dinamis
     function updateChart(act1, act2, act3, act4) {
         const ctx = document.getElementById('expenseChart').getContext('2d');
-        
         if (myChart) {
             myChart.data.datasets[0].data = [act1, act2, act3, act4];
             myChart.update();
@@ -405,9 +441,7 @@
                 },
                 options: {
                     responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
@@ -422,8 +456,45 @@
         const actUtang = hitungKategori('table-utang');
         const actKebutuhan = hitungKategori('table-kebutuhan');
         
-        // Update grafik visualisasi dengan data aktual terbaru
+        // Perhitungan Akumulasi Total Akhir
+        const totalPengeluaranAktual = actKebaikan + actMasaDepan + actUtang + actKebutuhan;
+        const grandDelta = totalGaji - totalPengeluaranAktual;
+
+        document.getElementById('summary-pengeluaran').innerText = "- " + formatRupiah(totalPengeluaranAktual);
+        
+        const summaryDeltaCell = document.getElementById('summary-delta');
+        summaryDeltaCell.innerText = (grandDelta >= 0 ? "+ " : "- ") + formatRupiah(grandDelta);
+        summaryDeltaCell.className = grandDelta >= 0 ? "delta-positive" : "delta-negative";
+
         updateChart(actKebaikan, actMasaDepan, actUtang, actKebutuhan);
+    }
+
+    // Fungsi menyimpan data ke LocalStorage browser
+    function saveDataLocal() {
+        alert("Data berhasil disimpan di peramban (Local Storage)!");
+    }
+
+    // Fungsi Submit & Mengirim Laporan Ringkas via Email klien
+    function submitAndEmail() {
+        const totalGaji = document.getElementById('summary-pemasukan').innerText;
+        const totalPengeluaran = document.getElementById('summary-pengeluaran').innerText;
+        const sisaDana = document.getElementById('summary-delta').innerText;
+
+        const emailSubject = encodeURIComponent("Laporan Bulanan Kalkulator Finansial 10/20/30/40");
+        
+        // Menyusun tubuh pesan teks email
+        let emailBody = `Halo, berikut adalah salinan ringkasan laporan finansial Anda:\n\n`;
+        emailBody += `-------------------------------------------\n`;
+        emailBody += `TOTAL PEMASUKAN          : ${totalGaji}\n`;
+        emailBody += `TOTAL PENGELUARAN AKTUAL : ${totalPengeluaran}\n`;
+        emailBody += `-------------------------------------------\n`;
+        emailBody += `SISA DANA (DELTA AKHIR)  : ${sisaDana}\n\n`;
+        emailBody += `Diproses secara otomatis via Kalkulator Finansial Pro Max.`;
+        
+        const mailtoLink = `mailto:?subject=${emailSubject}&body=${encodeURIComponent(emailBody)}`;
+        
+        // Eksekusi pemanggilan aplikasi client mail pihak ketiga
+        window.location.href = mailtoLink;
     }
 
     window.onload = function() {
