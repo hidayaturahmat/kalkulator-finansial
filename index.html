@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Finansial Pro 10/20/30/40</title>
+    <title>Kalkulator Finansial Pro Max 10/20/30/40</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,7 +14,7 @@
             color: #333;
         }
         .container {
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
             background: white;
             padding: 25px;
@@ -27,19 +28,30 @@
         }
         .input-section {
             text-align: center;
-            margin: 30px 0;
+            margin: 25px 0;
             background: #eef2f7;
             padding: 20px;
             border-radius: 8px;
         }
         input[type="number"] {
             padding: 10px;
-            width: 50%;
+            width: 40%;
             font-size: 16px;
             border: 2px solid #ddd;
             border-radius: 6px;
             outline: none;
         }
+        
+        /* Layout untuk Chart Dashboard */
+        .chart-container {
+            max-width: 400px;
+            margin: 0 auto 30px auto;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
         .grid-dashboard {
             display: grid;
             grid-template-columns: 1fr;
@@ -55,22 +67,17 @@
             padding: 15px;
             color: white;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 17px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .kebaikan .category-header { background-color: #17a2b8; }
         .masa-depan .category-header { background-color: #20c997; }
         .utang .category-header { background-color: #fd7e14; }
         .kebutuhan .category-header { background-color: #ffc107; color: #333; }
 
-        .category-body {
-            padding: 20px;
-        }
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-        }
+        .category-body { padding: 15px; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -78,10 +85,11 @@
         }
         th, td {
             text-align: left;
-            padding: 10px;
+            padding: 8px;
             border-bottom: 1px solid #eee;
         }
         th { background-color: #f8f9fa; font-size: 14px; }
+        
         .input-table {
             width: 100%;
             padding: 6px;
@@ -92,40 +100,67 @@
         .delta-positive { color: #28a745; font-weight: bold; }
         .delta-negative { color: #dc3545; font-weight: bold; }
         
-        .total-row {
-            font-weight: bold;
-            background-color: #f8f9fa;
+        .total-row { font-weight: bold; background-color: #f8f9fa; }
+
+        /* Tombol Aksi */
+        .btn-add {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
         }
+        .btn-add:hover { background-color: #1a252f; }
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-delete:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Prinsip 10/20/30/40 Bulanan</h1>
-    <h2>Alokasi & Tracker (Plan vs Actual)</h2>
+    <h1>Prinsip 10/20/30/40</h1>
+    <h2>Kalkulator Finansial & Chart Tracker</h2>
     
     <div class="input-section">
         <label for="gaji" style="display:block; margin-bottom:8px; font-weight:bold;">Masukkan Total Gaji Bersih (Rp):</label>
         <input type="number" id="gaji" value="5000000" oninput="updateAll()">
     </div>
 
+    <div class="chart-container">
+        <h3 style="text-align: center; margin-top: 0; color: #555;">Visualisasi Pengeluaran Aktual</h3>
+        <canvas id="expenseChart"></canvas>
+    </div>
+
     <div class="grid-dashboard">
         
         <div class="category-block kebaikan">
             <div class="category-header">
-                <span>10% - Kebaikan</span>
-                <span id="limit-kebaikan">Batas Ideal: Rp 500.000</span>
+                <span>10% - Kebaikan (<span id="limit-kebaikan">Rp 0</span>)</span>
+                <button class="btn-add" onclick="addRow('table-kebaikan')">+ Tambah Item</button>
             </div>
             <div class="category-body">
                 <table id="table-kebaikan">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th style="width:25%">Plan (Rp)</th><th style="width:25%">Actual (Rp)</th><th style="width:25%">Delta (Rp)</th></tr>
+                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Zakat / Perpuluhan</td><td><input type="number" class="plan input-table" value="250000"></td><td><input type="number" class="actual input-table" value="250000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Sedekah / Donasi</td><td><input type="number" class="plan input-table" value="150000"></td><td><input type="number" class="actual input-table" value="100000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Bantuan Keluarga</td><td><input type="number" class="plan input-table" value="100000"></td><td><input type="number" class="actual input-table" value="150000"></td><td class="delta">Rp 0</td></tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                        <tr>
+                            <td><input type="text" class="input-table" value="Zakat / Perpuluhan"></td>
+                            <td><input type="number" class="plan input-table" value="250000" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="250000" oninput="updateAll()"></td>
+                            <td class="delta">Rp 0</td>
+                            <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
+                        </tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -133,19 +168,23 @@
 
         <div class="category-block masa-depan">
             <div class="category-header">
-                <span>20% - Masa Depan</span>
-                <span id="limit-masadepan">Batas Ideal: Rp 1.000.000</span>
+                <span>20% - Masa Depan (<span id="limit-masadepan">Rp 0</span>)</span>
+                <button class="btn-add" onclick="addRow('table-masadepan')">+ Tambah Item</button>
             </div>
             <div class="category-body">
                 <table id="table-masadepan">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th>Plan (Rp)</th><th>Actual (Rp)</th><th>Delta (Rp)</th></tr>
+                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Tabungan / Dana Darurat</td><td><input type="number" class="plan input-table" value="500000"></td><td><input type="number" class="actual input-table" value="500000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Investasi (Reksadana/Saham)</td><td><input type="number" class="plan input-table" value="400000"></td><td><input type="number" class="actual input-table" value="300000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Asuransi</td><td><input type="number" class="plan input-table" value="100000"></td><td><input type="number" class="actual input-table" value="100000"></td><td class="delta">Rp 0</td></tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                        <tr>
+                            <td><input type="text" class="input-table" value="Tabungan"></td>
+                            <td><input type="number" class="plan input-table" value="1000000" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="1000000" oninput="updateAll()"></td>
+                            <td class="delta">Rp 0</td>
+                            <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
+                        </tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -153,18 +192,23 @@
 
         <div class="category-block utang">
             <div class="category-header">
-                <span>Maksimal 30% - Utang</span>
-                <span id="limit-utang">Batas Ideal: Rp 1.500.000</span>
+                <span>Maksimal 30% - Utang (<span id="limit-utang">Rp 0</span>)</span>
+                <button class="btn-add" onclick="addRow('table-utang')">+ Tambah Item</button>
             </div>
             <div class="category-body">
                 <table id="table-utang">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th>Plan (Rp)</th><th>Actual (Rp)</th><th>Delta (Rp)</th></tr>
+                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Cicilan Rumah / KPR</td><td><input type="number" class="plan input-table" value="1000000"></td><td><input type="number" class="actual input-table" value="1000000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Cicilan Kendaraan</td><td><input type="number" class="plan input-table" value="400000"></td><td><input type="number" class="actual input-table" value="400000"></td><td class="delta">Rp 0</td></tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                        <tr>
+                            <td><input type="text" class="input-table" value="Cicilan KPR"></td>
+                            <td><input type="number" class="plan input-table" value="1500000" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="1500000" oninput="updateAll()"></td>
+                            <td class="delta">Rp 0</td>
+                            <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
+                        </tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -172,20 +216,23 @@
 
         <div class="category-block kebutuhan">
             <div class="category-header">
-                <span>40% - Kebutuhan</span>
-                <span id="limit-kebutuhan">Batas Ideal: Rp 2.000.000</span>
+                <span>40% - Kebutuhan (<span id="limit-kebutuhan">Rp 0</span>)</span>
+                <button class="btn-add" onclick="addRow('table-kebutuhan')">+ Tambah Item</button>
             </div>
             <div class="category-body">
                 <table id="table-kebutuhan">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th>Plan (Rp)</th><th>Actual (Rp)</th><th>Delta (Rp)</th></tr>
+                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Makan & Belanja Bulanan</td><td><input type="number" class="plan input-table" value="1200000"></td><td><input type="number" class="actual input-table" value="1400000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Transportasi & Bensin</td><td><input type="number" class="plan input-table" value="300000"></td><td><input type="number" class="actual input-table" value="250000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Tagihan (Listrik/Internet/HP)</td><td><input type="number" class="plan input-table" value="300000"></td><td><input type="number" class="actual input-table" value="350000"></td><td class="delta">Rp 0</td></tr>
-                        <tr><td>Hiburan / Self Reward</td><td><input type="number" class="plan input-table" value="200000"></td><td><input type="number" class="actual input-table" value="150000"></td><td class="delta">Rp 0</td></tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                        <tr>
+                            <td><input type="text" class="input-table" value="Makan Bulanan"></td>
+                            <td><input type="number" class="plan input-table" value="2000000" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="1800000" oninput="updateAll()"></td>
+                            <td class="delta">Rp 0</td>
+                            <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
+                        </tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -195,8 +242,33 @@
 </div>
 
 <script>
+    let myChart;
+
     function formatRupiah(angka) {
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
+    }
+
+    // Fungsi menambah baris list baru secara manual
+    function addRow(tableId) {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const rowCount = table.rows.length;
+        const row = table.insertRow(rowCount - 1); // Sisipkan tepat di atas baris total
+
+        row.innerHTML = `
+            <td><input type="text" class="input-table" placeholder="Nama item..."></td>
+            <td><input type="number" class="plan input-table" value="0" oninput="updateAll()"></td>
+            <td><input type="number" class="actual input-table" value="0" oninput="updateAll()"></td>
+            <td class="delta">Rp 0</td>
+            <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
+        `;
+        updateAll();
+    }
+
+    // Fungsi menghapus baris list pengeluaran
+    function deleteRow(button) {
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+        updateAll();
     }
 
     function hitungKategori(tableId) {
@@ -209,14 +281,11 @@
         rows.forEach(row => {
             const planVal = parseFloat(row.querySelector('.plan').value) || 0;
             const actualVal = parseFloat(row.querySelector('.actual').value) || 0;
-            
-            // Delta = Plan - Actual (Sisa anggaran)
             const deltaVal = planVal - actualVal;
             
             totalPlan += planVal;
             totalActual += actualVal;
 
-            // Update Delta per baris
             const deltaCell = row.querySelector('.delta');
             if (deltaVal >= 0) {
                 deltaCell.innerText = "+ " + formatRupiah(deltaVal);
@@ -227,7 +296,6 @@
             }
         });
 
-        // Update Baris Total Kategori
         const totalDelta = totalPlan - totalActual;
         table.querySelector('.total-plan').innerText = formatRupiah(totalPlan);
         table.querySelector('.total-actual').innerText = formatRupiah(totalActual);
@@ -240,34 +308,59 @@
             totalDeltaCell.innerText = "- " + formatRupiah(totalDelta);
             totalDeltaCell.className = "total-delta delta-negative";
         }
+
+        return totalActual;
     }
 
     function updateLimits() {
         const gaji = parseFloat(document.getElementById('gaji').value) || 0;
+        document.getElementById('limit-kebaikan').innerText = formatRupiah(gaji * 0.1);
+        document.getElementById('limit-masadepan').innerText = formatRupiah(gaji * 0.2);
+        document.getElementById('limit-utang').innerText = formatRupiah(gaji * 0.3);
+        document.getElementById('limit-kebutuhan').innerText = formatRupiah(gaji * 0.4);
+    }
+
+    // Fungsi menggambar dan meng-update Grafik Chart.js secara dinamis
+    function updateChart(act1, act2, act3, act4) {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
         
-        document.getElementById('limit-kebaikan').innerText = "Batas Ideal: " + formatRupiah(gaji * 0.1);
-        document.getElementById('limit-masadepan').innerText = "Batas Ideal: " + formatRupiah(gaji * 0.2);
-        document.getElementById('limit-utang').innerText = "Maks Ideal: " + formatRupiah(gaji * 0.3);
-        document.getElementById('limit-kebutuhan').innerText = "Batas Ideal: " + formatRupiah(gaji * 0.4);
+        if (myChart) {
+            myChart.data.datasets[0].data = [act1, act2, act3, act4];
+            myChart.update();
+        } else {
+            myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Kebaikan (10%)', 'Masa Depan (20%)', 'Utang (30%)', 'Kebutuhan (40%)'],
+                    datasets: [{
+                        data: [act1, act2, act3, act4],
+                        backgroundColor: ['#17a2b8', '#20c997', '#fd7e14', '#ffc107'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
     }
 
     function updateAll() {
         updateLimits();
-        hitungKategori('table-kebaikan');
-        hitungKategori('table-masadepan');
-        hitungKategori('table-utang');
-        hitungKategori('table-kebutuhan');
+        const actKebaikan = hitungKategori('table-kebaikan');
+        const actMasaDepan = hitungKategori('table-masadepan');
+        const actUtang = hitungKategori('table-utang');
+        const actKebutuhan = hitungKategori('table-kebutuhan');
+        
+        // Update grafik visualisasi dengan data aktual terbaru
+        updateChart(actKebaikan, actMasaDepan, actUtang, actKebutuhan);
     }
 
-    // Jalankan kalkulasi pertama kali saat halaman dimuat
     window.onload = function() {
         updateAll();
-        
-        // Daftarkan event listener agar otomatis menghitung saat angka input Plan/Actual diubah
-        const allInputs = document.querySelectorAll('.input-table');
-        allInputs.forEach(input => {
-            input.addEventListener('input', updateAll);
-        });
     };
 </script>
 
