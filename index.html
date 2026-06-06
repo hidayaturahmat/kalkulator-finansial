@@ -79,6 +79,7 @@
             text-align: left;
             padding: 8px;
             border-bottom: 1px solid #eee;
+            vertical-align: middle;
         }
         th { background-color: #f8f9fa; font-size: 14px; }
         
@@ -89,10 +90,40 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+        .input-table:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+        }
+        
+        /* Gaya Status Baris */
+        .row-unpaid {
+            background-color: #fffdf6;
+            opacity: 0.85;
+        }
+        .row-paid {
+            background-color: #f0fdf4;
+        }
+        
+        .check-status {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        
+        .badge-status {
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .badge-unpaid { background-color: #fee2e2; color: #ef4444; }
+        .badge-paid { background-color: #dcfce7; color: #22c55e; }
+
         .delta-positive { color: #28a745; font-weight: bold; }
         .delta-negative { color: #dc3545; font-weight: bold; }
         
-        .total-row { font-weight: bold; background-color: #f8f9fa; }
+        .total-row { font-weight: bold; background-color: #f8f9fa !important; opacity: 1 !important; }
 
         /* Tombol Aksi */
         .btn-add {
@@ -207,17 +238,21 @@
             <div class="category-body">
                 <table id="table-kebaikan">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><input type="text" class="input-table" value="Zakat / Perpuluhan"></td>
+                        <tr class="row-paid">
+                            <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
+                            <td>
+                                <input type="text" class="item-name input-table" value="Zakat / Perpuluhan">
+                                <span class="badge-status badge-paid">Sudah Bayar</span>
+                            </td>
                             <td><input type="number" class="plan input-table" value="250000" oninput="updateAll()"></td>
                             <td><input type="number" class="actual input-table" value="250000" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -231,17 +266,21 @@
             <div class="category-body">
                 <table id="table-masadepan">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><input type="text" class="input-table" value="Tabungan"></td>
+                        <tr class="row-paid">
+                            <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
+                            <td>
+                                <input type="text" class="item-name input-table" value="Tabungan">
+                                <span class="badge-status badge-paid">Sudah Bayar</span>
+                            </td>
                             <td><input type="number" class="plan input-table" value="1000000" oninput="updateAll()"></td>
                             <td><input type="number" class="actual input-table" value="1000000" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -255,17 +294,21 @@
             <div class="category-body">
                 <table id="table-utang">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><input type="text" class="input-table" value="Cicilan KPR"></td>
+                        <tr class="row-paid">
+                            <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
+                            <td>
+                                <input type="text" class="item-name input-table" value="Cicilan KPR">
+                                <span class="badge-status badge-paid">Sudah Bayar</span>
+                            </td>
                             <td><input type="number" class="plan input-table" value="1500000" oninput="updateAll()"></td>
                             <td><input type="number" class="actual input-table" value="1500000" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -279,17 +322,21 @@
             <div class="category-body">
                 <table id="table-kebutuhan">
                     <thead>
-                        <tr><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><input type="text" class="input-table" value="Makan Bulanan"></td>
+                        <tr class="row-paid">
+                            <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
+                            <td>
+                                <input type="text" class="item-name input-table" value="Makan Bulanan">
+                                <span class="badge-status badge-paid">Sudah Bayar</span>
+                            </td>
                             <td><input type="number" class="plan input-table" value="2000000" oninput="updateAll()"></td>
                             <td><input type="number" class="actual input-table" value="1800000" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -302,11 +349,11 @@
             <span id="summary-pemasukan">Rp 0</span>
         </div>
         <div class="summary-row">
-            <span>Total Pengeluaran Aktual:</span>
+            <span>Total Pengeluaran Aktual (Dari yang sudah dibayar):</span>
             <span id="summary-pengeluaran" style="color: #dc3545;">- Rp 0</span>
         </div>
         <div class="summary-row grand-total">
-            <span>Sisa Dana (Delta Akhir):</span>
+            <span>Sisa Dana Bersih (Delta Akhir):</span>
             <span id="summary-delta">Rp 0</span>
         </div>
         
@@ -322,6 +369,35 @@
 
     function formatRupiah(angka) {
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
+    }
+
+    // Mengubah status baris berdasarkan checkbox
+    function toggleRowStatus(checkbox) {
+        const row = checkbox.parentNode.parentNode;
+        const actualInput = row.querySelector('.actual');
+        const badgeContainer = row.cells[1];
+        
+        // Hapus badge lama jika ada
+        const oldBadge = badgeContainer.querySelector('.badge-status');
+        if (oldBadge) oldBadge.remove();
+
+        const badge = document.createElement('span');
+        badge.className = 'badge-status';
+
+        if (checkbox.checked) {
+            row.className = 'row-paid';
+            actualInput.disabled = false;
+            badge.classList.add('badge-paid');
+            badge.innerText = 'Sudah Bayar';
+        } else {
+            row.className = 'row-unpaid';
+            actualInput.disabled = true;
+            actualInput.value = 0; // Otomatis 0 jika belum dibayar
+            badge.classList.add('badge-unpaid');
+            badge.innerText = 'Belum Bayar';
+        }
+        badgeContainer.appendChild(badge);
+        updateAll();
     }
 
     function addIncomeRow() {
@@ -358,11 +434,16 @@
         const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
         const row = table.insertRow(rowCount - 1);
+        row.className = 'row-unpaid';
 
         row.innerHTML = `
-            <td><input type="text" class="input-table" placeholder="Nama item..."></td>
+            <td style="text-align:center;"><input type="checkbox" class="check-status" onchange="toggleRowStatus(this)"></td>
+            <td>
+                <input type="text" class="item-name input-table" placeholder="Nama item...">
+                <span class="badge-status badge-unpaid">Belum Bayar</span>
+            </td>
             <td><input type="number" class="plan input-table" value="0" oninput="updateAll()"></td>
-            <td><input type="number" class="actual input-table" value="0" oninput="updateAll()"></td>
+            <td><input type="number" class="actual input-table" value="0" disabled oninput="updateAll()"></td>
             <td class="delta">Rp 0</td>
             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
         `;
@@ -432,7 +513,7 @@
             myChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: ['Kebaikan (10%)', 'Masa Depan (20%)', 'Utang (30%)', 'Kebutuhan (40%)'],
+                    labels: ['Kebaikan', 'Masa Depan', 'Utang', 'Kebutuhan'],
                     datasets: [{
                         data: [act1, act2, act3, act4],
                         backgroundColor: ['#17a2b8', '#20c997', '#fd7e14', '#ffc107'],
@@ -456,7 +537,6 @@
         const actUtang = hitungKategori('table-utang');
         const actKebutuhan = hitungKategori('table-kebutuhan');
         
-        // Perhitungan Akumulasi Total Akhir
         const totalPengeluaranAktual = actKebaikan + actMasaDepan + actUtang + actKebutuhan;
         const grandDelta = totalGaji - totalPengeluaranAktual;
 
@@ -469,31 +549,46 @@
         updateChart(actKebaikan, actMasaDepan, actUtang, actKebutuhan);
     }
 
-    // Fungsi menyimpan data ke LocalStorage browser
     function saveDataLocal() {
         alert("Data berhasil disimpan di peramban (Local Storage)!");
     }
 
-    // Fungsi Submit & Mengirim Laporan Ringkas via Email klien
+    function ambilDataKategoriTeks(tableId, namaKategori) {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr:not(.total-row)`);
+        let teks = `\n[Kategori ${namaKategori}]\n`;
+        rows.forEach(row => {
+            const nama = row.querySelector('.item-name').value || "Tanpa Nama";
+            const plan = row.querySelector('.plan').value || 0;
+            const actual = row.querySelector('.actual').value || 0;
+            const isPaid = row.querySelector('.check-status').checked ? "[SUDAH BAYAR]" : "[BELUM BAYAR]";
+            teks += `- ${nama} : Plan Rp ${parseInt(plan).toLocaleString('id-ID')} | Actual Rp ${parseInt(actual).toLocaleString('id-ID')} ${isPaid}\n`;
+        });
+        return teks;
+    }
+
     function submitAndEmail() {
         const totalGaji = document.getElementById('summary-pemasukan').innerText;
         const totalPengeluaran = document.getElementById('summary-pengeluaran').innerText;
         const sisaDana = document.getElementById('summary-delta').innerText;
 
-        const emailSubject = encodeURIComponent("Laporan Bulanan Kalkulator Finansial 10/20/30/40");
+        const emailSubject = encodeURIComponent("Laporan Transaksi Bulanan - Kalkulator 10/20/30/40");
         
-        // Menyusun tubuh pesan teks email
-        let emailBody = `Halo, berikut adalah salinan ringkasan laporan finansial Anda:\n\n`;
-        emailBody += `-------------------------------------------\n`;
+        let emailBody = `Halo, berikut adalah rincian laporan pengeluaran aktual Anda:\n\n`;
+        emailBody += `===========================================\n`;
         emailBody += `TOTAL PEMASUKAN          : ${totalGaji}\n`;
         emailBody += `TOTAL PENGELUARAN AKTUAL : ${totalPengeluaran}\n`;
-        emailBody += `-------------------------------------------\n`;
-        emailBody += `SISA DANA (DELTA AKHIR)  : ${sisaDana}\n\n`;
-        emailBody += `Diproses secara otomatis via Kalkulator Finansial Pro Max.`;
+        emailBody += `SISA DANA BERSIH         : ${sisaDana}\n`;
+        emailBody += `===========================================\n`;
+        
+        // Memasukkan detail item per kategori ke bodi email
+        emailBody += ambilDataKategoriTeks('table-kebaikan', 'Kebaikan (10%)');
+        emailBody += ambilDataKategoriTeks('table-masadepan', 'Masa Depan (20%)');
+        emailBody += ambilDataKategoriTeks('table-utang', 'Utang (30%)');
+        emailBody += ambilDataKategoriTeks('table-kebutuhan', 'Kebutuhan (40%)');
+
+        emailBody += `\nDiproses via Kalkulator Finansial Pro Max Tracker.`;
         
         const mailtoLink = `mailto:?subject=${emailSubject}&body=${encodeURIComponent(emailBody)}`;
-        
-        // Eksekusi pemanggilan aplikasi client mail pihak ketiga
         window.location.href = mailtoLink;
     }
 
