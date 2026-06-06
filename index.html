@@ -187,6 +187,13 @@
         .btn-save:hover { background-color: #374151; }
         .btn-submit { background-color: #2563eb; color: white; }
         .btn-submit:hover { background-color: #1d4ed8; }
+        
+        .col-num {
+            text-align: center;
+            font-weight: bold;
+            color: #64748b;
+            width: 4%;
+        }
     </style>
 </head>
 <body>
@@ -204,6 +211,7 @@
             <table id="table-pemasukan">
                 <thead>
                     <tr>
+                        <th style="width: 4%;">#</th>
                         <th>Sumber Pemasukan</th>
                         <th style="width: 44%">Nominal (Rp)</th>
                         <th style="width: 8%">Aksi</th>
@@ -211,11 +219,13 @@
                 </thead>
                 <tbody>
                     <tr>
+                        <td class="col-num income-index">1</td>
                         <td><input type="text" class="input-table" value="Gaji Pokok"></td>
                         <td><input type="number" class="income-value input-table" value="5000000" oninput="updateAll()"></td>
                         <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
                     </tr>
                     <tr class="total-row">
+                        <td></td>
                         <td>Total Pemasukan Bersih</td>
                         <td id="total-gaji-label" colspan="2">Rp 5.000.000</td>
                     </tr>
@@ -238,10 +248,11 @@
             <div class="category-body">
                 <table id="table-kebaikan">
                     <thead>
-                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
                         <tr class="row-paid">
+                            <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
                                 <input type="text" class="item-name input-table" value="Zakat / Perpuluhan">
@@ -252,7 +263,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -266,10 +277,11 @@
             <div class="category-body">
                 <table id="table-masadepan">
                     <thead>
-                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
                         <tr class="row-paid">
+                            <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
                                 <input type="text" class="item-name input-table" value="Tabungan">
@@ -280,7 +292,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -294,10 +306,11 @@
             <div class="category-body">
                 <table id="table-utang">
                     <thead>
-                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
                         <tr class="row-paid">
+                            <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
                                 <input type="text" class="item-name input-table" value="Cicilan KPR">
@@ -308,7 +321,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -322,10 +335,11 @@
             <div class="category-body">
                 <table id="table-kebutuhan">
                     <thead>
-                        <tr><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody>
                         <tr class="row-paid">
+                            <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
                                 <input type="text" class="item-name input-table" value="Makan Bulanan">
@@ -336,7 +350,7 @@
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
-                        <tr class="total-row"><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
+                        <tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -371,13 +385,19 @@
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
     }
 
-    // Mengubah status baris berdasarkan checkbox
+    // Fungsi refresh nomor indeks/urut tabel agar berurutan secara dinamis
+    function refreshRowIndices(tableId, classSelector) {
+        const rows = document.querySelectorAll(`#${tableId} tbody .${classSelector}`);
+        rows.forEach((td, index) => {
+            td.innerText = index + 1;
+        });
+    }
+
     function toggleRowStatus(checkbox) {
         const row = checkbox.parentNode.parentNode;
         const actualInput = row.querySelector('.actual');
-        const badgeContainer = row.cells[1];
+        const badgeContainer = row.cells[2]; // Bergeser ke cell indeks 2 karena cell 0 diambil nomor urut
         
-        // Hapus badge lama jika ada
         const oldBadge = badgeContainer.querySelector('.badge-status');
         if (oldBadge) oldBadge.remove();
 
@@ -392,7 +412,7 @@
         } else {
             row.className = 'row-unpaid';
             actualInput.disabled = true;
-            actualInput.value = 0; // Otomatis 0 jika belum dibayar
+            actualInput.value = 0;
             badge.classList.add('badge-unpaid');
             badge.innerText = 'Belum Bayar';
         }
@@ -406,6 +426,7 @@
         const row = table.insertRow(rowCount - 1);
 
         row.innerHTML = `
+            <td class="col-num income-index"></td>
             <td><input type="text" class="input-table" placeholder="Sumber lain..."></td>
             <td><input type="number" class="income-value input-table" value="0" oninput="updateAll()"></td>
             <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
@@ -420,6 +441,7 @@
     }
 
     function hitungTotalGaji() {
+        refreshRowIndices('table-pemasukan', 'income-index');
         const incomeInputs = document.querySelectorAll('.income-value');
         let totalGaji = 0;
         incomeInputs.forEach(input => {
@@ -437,6 +459,7 @@
         row.className = 'row-unpaid';
 
         row.innerHTML = `
+            <td class="col-num item-index"></td>
             <td style="text-align:center;"><input type="checkbox" class="check-status" onchange="toggleRowStatus(this)"></td>
             <td>
                 <input type="text" class="item-name input-table" placeholder="Nama item...">
@@ -457,6 +480,7 @@
     }
 
     function hitungKategori(tableId) {
+        refreshRowIndices(tableId, 'item-index');
         const table = document.getElementById(tableId);
         const rows = table.querySelectorAll('tbody tr:not(.total-row)');
         
@@ -556,12 +580,12 @@
     function ambilDataKategoriTeks(tableId, namaKategori) {
         const rows = document.querySelectorAll(`#${tableId} tbody tr:not(.total-row)`);
         let teks = `\n[Kategori ${namaKategori}]\n`;
-        rows.forEach(row => {
+        rows.forEach((row, index) => {
             const nama = row.querySelector('.item-name').value || "Tanpa Nama";
             const plan = row.querySelector('.plan').value || 0;
             const actual = row.querySelector('.actual').value || 0;
             const isPaid = row.querySelector('.check-status').checked ? "[SUDAH BAYAR]" : "[BELUM BAYAR]";
-            teks += `- ${nama} : Plan Rp ${parseInt(plan).toLocaleString('id-ID')} | Actual Rp ${parseInt(actual).toLocaleString('id-ID')} ${isPaid}\n`;
+            teks += `${index + 1}. ${nama} : Plan Rp ${parseInt(plan).toLocaleString('id-ID')} | Actual Rp ${parseInt(actual).toLocaleString('id-ID')} ${isPaid}\n`;
         });
         return teks;
     }
@@ -580,7 +604,6 @@
         emailBody += `SISA DANA BERSIH         : ${sisaDana}\n`;
         emailBody += `===========================================\n`;
         
-        // Memasukkan detail item per kategori ke bodi email
         emailBody += ambilDataKategoriTeks('table-kebaikan', 'Kebaikan (10%)');
         emailBody += ambilDataKategoriTeks('table-masadepan', 'Masa Depan (20%)');
         emailBody += ambilDataKategoriTeks('table-utang', 'Utang (30%)');
