@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Finansial 10/20/30/40</title>
+    <title>Kalkulator Finansial Pro 10/20/30/40</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,7 +13,7 @@
             color: #333;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             padding: 25px;
@@ -23,121 +23,252 @@
         h1, h2 {
             text-align: center;
             color: #2c3e50;
+            margin-bottom: 5px;
         }
         .input-section {
             text-align: center;
-            margin-bottom: 30px;
+            margin: 30px 0;
+            background: #eef2f7;
+            padding: 20px;
+            border-radius: 8px;
         }
         input[type="number"] {
-            padding: 12px;
-            width: 60%;
+            padding: 10px;
+            width: 50%;
             font-size: 16px;
             border: 2px solid #ddd;
-            border-radius: 8px;
+            border-radius: 6px;
             outline: none;
-            transition: 0.3s;
-        }
-        input[type="number"]:focus {
-            border-color: #3498db;
         }
         .grid-dashboard {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 25px;
         }
-        @media (max-width: 600px) {
-            .grid-dashboard { grid-template-columns: 1fr; }
+        .category-block {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
         }
-        .card {
-            padding: 20px;
-            border-radius: 10px;
+        .category-header {
+            padding: 15px;
             color: white;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
         }
-        .kebaikan { background-color: #17a2b8; }
-        .masa-depan { background-color: #20c997; }
-        .utang { background-color: #fd7e14; }
-        .kebutuhan { background-color: #ffc107; color: #333; }
+        .kebaikan .category-header { background-color: #17a2b8; }
+        .masa-depan .category-header { background-color: #20c997; }
+        .utang .category-header { background-color: #fd7e14; }
+        .kebutuhan .category-header { background-color: #ffc107; color: #333; }
+
+        .category-body {
+            padding: 20px;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        th { background-color: #f8f9fa; font-size: 14px; }
+        .input-table {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .delta-positive { color: #28a745; font-weight: bold; }
+        .delta-negative { color: #dc3545; font-weight: bold; }
         
-        .card h3 { margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
-        .amount { font-size: 24px; font-weight: bold; margin: 10px 0; }
-        ul { padding-left: 20px; margin-bottom: 0; font-size: 14px; }
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Prinsip 10/20/30/40</h1>
-    <h2>Pengelolaan Penghasilan</h2>
+    <h1>Prinsip 10/20/30/40 Bulanan</h1>
+    <h2>Alokasi & Tracker (Plan vs Actual)</h2>
     
     <div class="input-section">
-        <label for="gaji" style="display:block; margin-bottom:8px; font-weight:bold;">Masukkan Gaji Bulanan Anda (Rp):</label>
-        <input type="number" id="gaji" placeholder="Contoh: 5000000" oninput="hitungFinansial()">
+        <label for="gaji" style="display:block; margin-bottom:8px; font-weight:bold;">Masukkan Total Gaji Bersih (Rp):</label>
+        <input type="number" id="gaji" value="5000000" oninput="updateAll()">
     </div>
 
     <div class="grid-dashboard">
-        <div class="card kebaikan">
-            <h3>10% - Kebaikan</h3>
-            <div class="amount" id="txt-kebaikan">Rp 0</div>
-            <ul>
-                <li>Zakat / Perpuluhan</li>
-                <li>Dana Sosial & Donasi</li>
-                <li>Bantuan Keluarga / Sedekah</li>
-            </ul>
+        
+        <div class="category-block kebaikan">
+            <div class="category-header">
+                <span>10% - Kebaikan</span>
+                <span id="limit-kebaikan">Batas Ideal: Rp 500.000</span>
+            </div>
+            <div class="category-body">
+                <table id="table-kebaikan">
+                    <thead>
+                        <tr><th>Item Pengeluaran</th><th style="width:25%">Plan (Rp)</th><th style="width:25%">Actual (Rp)</th><th style="width:25%">Delta (Rp)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Zakat / Perpuluhan</td><td><input type="number" class="plan input-table" value="250000"></td><td><input type="number" class="actual input-table" value="250000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Sedekah / Donasi</td><td><input type="number" class="plan input-table" value="150000"></td><td><input type="number" class="actual input-table" value="100000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Bantuan Keluarga</td><td><input type="number" class="plan input-table" value="100000"></td><td><input type="number" class="actual input-table" value="150000"></td><td class="delta">Rp 0</td></tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="card masa-depan">
-            <h3>20% - Masa Depan</h3>
-            <div class="amount" id="txt-masadepan">Rp 0</div>
-            <ul>
-                <li>Dana Darurat</li>
-                <li>Investasi & Tabungan</li>
-                <li>Asuransi</li>
-            </ul>
+        <div class="category-block masa-depan">
+            <div class="category-header">
+                <span>20% - Masa Depan</span>
+                <span id="limit-masadepan">Batas Ideal: Rp 1.000.000</span>
+            </div>
+            <div class="category-body">
+                <table id="table-masadepan">
+                    <thead>
+                        <tr><th>Item Pengeluaran</th><th>Plan (Rp)</th><th>Actual (Rp)</th><th>Delta (Rp)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Tabungan / Dana Darurat</td><td><input type="number" class="plan input-table" value="500000"></td><td><input type="number" class="actual input-table" value="500000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Investasi (Reksadana/Saham)</td><td><input type="number" class="plan input-table" value="400000"></td><td><input type="number" class="actual input-table" value="300000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Asuransi</td><td><input type="number" class="plan input-table" value="100000"></td><td><input type="number" class="actual input-table" value="100000"></td><td class="delta">Rp 0</td></tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="card utang">
-            <h3>Maksimal 30% - Utang</h3>
-            <div class="amount" id="txt-utang">Rp 0</div>
-            <ul>
-                <li>Cicilan Rumah / Apartemen</li>
-                <li>Cicilan Kendaraan</li>
-                <li>Utang Produktif</li>
-            </ul>
+        <div class="category-block utang">
+            <div class="category-header">
+                <span>Maksimal 30% - Utang</span>
+                <span id="limit-utang">Batas Ideal: Rp 1.500.000</span>
+            </div>
+            <div class="category-body">
+                <table id="table-utang">
+                    <thead>
+                        <tr><th>Item Pengeluaran</th><th>Plan (Rp)</th><th>Actual (Rp)</th><th>Delta (Rp)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Cicilan Rumah / KPR</td><td><input type="number" class="plan input-table" value="1000000"></td><td><input type="number" class="actual input-table" value="1000000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Cicilan Kendaraan</td><td><input type="number" class="plan input-table" value="400000"></td><td><input type="number" class="actual input-table" value="400000"></td><td class="delta">Rp 0</td></tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="card kebutuhan">
-            <h3>40% - Kebutuhan</h3>
-            <div class="amount" id="txt-kebutuhan">Rp 0</div>
-            <ul>
-                <li>Biaya Rumah Tangga & Makan</li>
-                <li>Transportasi / Ongkos</li>
-                <li>Pulsa / Internet / Listrik</li>
-                <li>Pendidikan & Hiburan</li>
-            </ul>
+        <div class="category-block kebutuhan">
+            <div class="category-header">
+                <span>40% - Kebutuhan</span>
+                <span id="limit-kebutuhan">Batas Ideal: Rp 2.000.000</span>
+            </div>
+            <div class="category-body">
+                <table id="table-kebutuhan">
+                    <thead>
+                        <tr><th>Item Pengeluaran</th><th>Plan (Rp)</th><th>Actual (Rp)</th><th>Delta (Rp)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Makan & Belanja Bulanan</td><td><input type="number" class="plan input-table" value="1200000"></td><td><input type="number" class="actual input-table" value="1400000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Transportasi & Bensin</td><td><input type="number" class="plan input-table" value="300000"></td><td><input type="number" class="actual input-table" value="250000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Tagihan (Listrik/Internet/HP)</td><td><input type="number" class="plan input-table" value="300000"></td><td><input type="number" class="actual input-table" value="350000"></td><td class="delta">Rp 0</td></tr>
+                        <tr><td>Hiburan / Self Reward</td><td><input type="number" class="plan input-table" value="200000"></td><td><input type="number" class="actual input-table" value="150000"></td><td class="delta">Rp 0</td></tr>
+                        <tr class="total-row"><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+
     </div>
 </div>
 
 <script>
     function formatRupiah(angka) {
-        return "Rp " + angka.toLocaleString('id-ID');
+        return "Rp " + Math.abs(angka).toLocaleString('id-ID');
     }
 
-    function hitungFinansial() {
+    function hitungKategori(tableId) {
+        const table = document.getElementById(tableId);
+        const rows = table.querySelectorAll('tbody tr:not(.total-row)');
+        
+        let totalPlan = 0;
+        let totalActual = 0;
+
+        rows.forEach(row => {
+            const planVal = parseFloat(row.querySelector('.plan').value) || 0;
+            const actualVal = parseFloat(row.querySelector('.actual').value) || 0;
+            
+            // Delta = Plan - Actual (Sisa anggaran)
+            const deltaVal = planVal - actualVal;
+            
+            totalPlan += planVal;
+            totalActual += actualVal;
+
+            // Update Delta per baris
+            const deltaCell = row.querySelector('.delta');
+            if (deltaVal >= 0) {
+                deltaCell.innerText = "+ " + formatRupiah(deltaVal);
+                deltaCell.className = "delta delta-positive";
+            } else {
+                deltaCell.innerText = "- " + formatRupiah(deltaVal);
+                deltaCell.className = "delta delta-negative";
+            }
+        });
+
+        // Update Baris Total Kategori
+        const totalDelta = totalPlan - totalActual;
+        table.querySelector('.total-plan').innerText = formatRupiah(totalPlan);
+        table.querySelector('.total-actual').innerText = formatRupiah(totalActual);
+        
+        const totalDeltaCell = table.querySelector('.total-delta');
+        if (totalDelta >= 0) {
+            totalDeltaCell.innerText = "+ " + formatRupiah(totalDelta);
+            totalDeltaCell.className = "total-delta delta-positive";
+        } else {
+            totalDeltaCell.innerText = "- " + formatRupiah(totalDelta);
+            totalDeltaCell.className = "total-delta delta-negative";
+        }
+    }
+
+    function updateLimits() {
         const gaji = parseFloat(document.getElementById('gaji').value) || 0;
-
-        // Hitung Alokasi
-        const kebaikan = gaji * 0.10;
-        const masadepan = gaji * 0.20;
-        const utang = gaji * 0.30;
-        const kebutuhan = gaji * 0.40;
-
-        // Tampilkan ke UI
-        document.getElementById('txt-kebaikan').innerText = formatRupiah(kebaikan);
-        document.getElementById('txt-masadepan').innerText = formatRupiah(masadepan);
-        document.getElementById('txt-utang').innerText = formatRupiah(utang);
-        document.getElementById('txt-kebutuhan').innerText = formatRupiah(kebutuhan);
+        
+        document.getElementById('limit-kebaikan').innerText = "Batas Ideal: " + formatRupiah(gaji * 0.1);
+        document.getElementById('limit-masadepan').innerText = "Batas Ideal: " + formatRupiah(gaji * 0.2);
+        document.getElementById('limit-utang').innerText = "Maks Ideal: " + formatRupiah(gaji * 0.3);
+        document.getElementById('limit-kebutuhan').innerText = "Batas Ideal: " + formatRupiah(gaji * 0.4);
     }
+
+    function updateAll() {
+        updateLimits();
+        hitungKategori('table-kebaikan');
+        hitungKategori('table-masadepan');
+        hitungKategori('table-utang');
+        hitungKategori('table-kebutuhan');
+    }
+
+    // Jalankan kalkulasi pertama kali saat halaman dimuat
+    window.onload = function() {
+        updateAll();
+        
+        // Daftarkan event listener agar otomatis menghitung saat angka input Plan/Actual diubah
+        const allInputs = document.querySelectorAll('.input-table');
+        allInputs.forEach(input => {
+            input.addEventListener('input', updateAll);
+        });
+    };
 </script>
 
 </body>
