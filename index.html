@@ -27,19 +27,20 @@
             margin-bottom: 5px;
         }
         .input-section {
-            text-align: center;
             margin: 25px 0;
             background: #eef2f7;
             padding: 20px;
             border-radius: 8px;
         }
-        input[type="number"] {
-            padding: 10px;
-            width: 40%;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            outline: none;
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .section-header h3 {
+            margin: 0;
+            color: #2c3e50;
         }
         
         /* Layout untuk Chart Dashboard */
@@ -72,6 +73,7 @@
             justify-content: space-between;
             align-items: center;
         }
+        .pemasukan .category-header { background-color: #4a5568; }
         .kebaikan .category-header { background-color: #17a2b8; }
         .masa-depan .category-header { background-color: #20c997; }
         .utang .category-header { background-color: #fd7e14; }
@@ -122,6 +124,14 @@
             cursor: pointer;
         }
         .btn-delete:hover { background-color: #c82333; }
+        
+        .total-gaji-display {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px dashed #cbd5e1;
+        }
     </style>
 </head>
 <body>
@@ -130,9 +140,33 @@
     <h1>Prinsip 10/20/30/40</h1>
     <h2>Kalkulator Finansial & Chart Tracker</h2>
     
-    <div class="input-section">
-        <label for="gaji" style="display:block; margin-bottom:8px; font-weight:bold;">Masukkan Total Gaji Bersih (Rp):</label>
-        <input type="number" id="gaji" value="5000000" oninput="updateAll()">
+    <div class="input-section category-block pemasukan">
+        <div class="category-header">
+            <span>Sumber Pemasukan Bulanan</span>
+            <button class="btn-add" onclick="addIncomeRow()">+ Tambah Sumber</button>
+        </div>
+        <div class="category-body">
+            <table id="table-pemasukan">
+                <thead>
+                    <tr>
+                        <th>Sumber Pemasukan</th>
+                        <th style="width: 44%">Nominal (Rp)</th>
+                        <th style="width: 8%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="input-table" value="Gaji Pokok"></td>
+                        <td><input type="number" class="income-value input-table" value="5000000" oninput="updateAll()"></td>
+                        <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>Total Pemasukan Bersih</td>
+                        <td id="total-gaji-label" colspan="2">Rp 5.000.000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="chart-container">
@@ -248,11 +282,43 @@
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
     }
 
-    // Fungsi menambah baris list baru secara manual
+    // Fungsi menambah baris pemasukan baru
+    function addIncomeRow() {
+        const table = document.getElementById('table-pemasukan').getElementsByTagName('tbody')[0];
+        const rowCount = table.rows.length;
+        const row = table.insertRow(rowCount - 1);
+
+        row.innerHTML = `
+            <td><input type="text" class="input-table" placeholder="Sumber lain..."></td>
+            <td><input type="number" class="income-value input-table" value="0" oninput="updateAll()"></td>
+            <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
+        `;
+        updateAll();
+    }
+
+    // Fungsi menghapus baris pemasukan
+    function deleteIncomeRow(button) {
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+        updateAll();
+    }
+
+    // Fungsi hitung total pemasukan keseluruhan
+    function hitungTotalGaji() {
+        const incomeInputs = document.querySelectorAll('.income-value');
+        let totalGaji = 0;
+        incomeInputs.forEach(input => {
+            totalGaji += parseFloat(input.value) || 0;
+        });
+        document.getElementById('total-gaji-label').innerText = formatRupiah(totalGaji);
+        return totalGaji;
+    }
+
+    // Fungsi menambah baris list baru secara manual (Pengeluaran)
     function addRow(tableId) {
         const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
-        const row = table.insertRow(rowCount - 1); // Sisipkan tepat di atas baris total
+        const row = table.insertRow(rowCount - 1);
 
         row.innerHTML = `
             <td><input type="text" class="input-table" placeholder="Nama item..."></td>
@@ -312,8 +378,7 @@
         return totalActual;
     }
 
-    function updateLimits() {
-        const gaji = parseFloat(document.getElementById('gaji').value) || 0;
+    function updateLimits(gaji) {
         document.getElementById('limit-kebaikan').innerText = formatRupiah(gaji * 0.1);
         document.getElementById('limit-masadepan').innerText = formatRupiah(gaji * 0.2);
         document.getElementById('limit-utang').innerText = formatRupiah(gaji * 0.3);
@@ -349,7 +414,9 @@
     }
 
     function updateAll() {
-        updateLimits();
+        const totalGaji = hitungTotalGaji();
+        updateLimits(totalGaji);
+        
         const actKebaikan = hitungKategori('table-kebaikan');
         const actMasaDepan = hitungKategori('table-masadepan');
         const actUtang = hitungKategori('table-utang');
