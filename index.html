@@ -33,7 +33,6 @@
             border-radius: 8px;
         }
         
-        /* Layout untuk Chart Dashboard */
         .chart-container {
             max-width: 400px;
             margin: 0 auto 30px auto;
@@ -47,6 +46,9 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 25px;
+        }
+        @media(min-width: 768px) {
+            .grid-dashboard { grid-template-columns: 1fr 1fr; }
         }
         .category-block {
             border: 1px solid #ddd;
@@ -69,7 +71,7 @@
         .utang .category-header { background-color: #fd7e14; }
         .kebutuhan .category-header { background-color: #ffc107; color: #333; }
 
-        .category-body { padding: 15px; }
+        .category-body { padding: 15px; overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -95,19 +97,9 @@
             color: #94a3b8;
         }
         
-        /* Gaya Status Baris */
-        .row-unpaid {
-            background-color: #fffdf6;
-            opacity: 0.85;
-        }
-        .row-paid {
-            background-color: #f0fdf4;
-        }
-        
-        .check-status {
-            transform: scale(1.2);
-            cursor: pointer;
-        }
+        .row-unpaid { background-color: #fffdf6; opacity: 0.85; }
+        .row-paid { background-color: #f0fdf4; }
+        .check-status { transform: scale(1.2); cursor: pointer; }
         
         .badge-status {
             font-size: 11px;
@@ -122,10 +114,8 @@
 
         .delta-positive { color: #28a745; font-weight: bold; }
         .delta-negative { color: #dc3545; font-weight: bold; }
-        
         .total-row { font-weight: bold; background-color: #f8f9fa !important; opacity: 1 !important; }
 
-        /* Tombol Aksi */
         .btn-add {
             background-color: #2c3e50;
             color: white;
@@ -146,7 +136,6 @@
         }
         .btn-delete:hover { background-color: #c82333; }
 
-        /* Ringkasan Akhir & Tombol Aksi Utama */
         .summary-panel {
             margin-top: 30px;
             background: #f8fafc;
@@ -220,7 +209,7 @@
                 <tbody>
                     <tr>
                         <td class="col-num income-index">1</td>
-                        <td><input type="text" class="input-table" value="Gaji Pokok"></td>
+                        <td><input type="text" class="income-name input-table" value="Gaji Pokok" oninput="updateAll()"></td>
                         <td><input type="number" class="income-value input-table" value="5000000" oninput="updateAll()"></td>
                         <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
                     </tr>
@@ -255,7 +244,7 @@
                             <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
-                                <input type="text" class="item-name input-table" value="Zakat / Perpuluhan">
+                                <input type="text" class="item-name input-table" value="Zakat / Perpuluhan" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
                             <td><input type="number" class="plan input-table" value="250000" oninput="updateAll()"></td>
@@ -284,7 +273,7 @@
                             <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
-                                <input type="text" class="item-name input-table" value="Tabungan">
+                                <input type="text" class="item-name input-table" value="Tabungan" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
                             <td><input type="number" class="plan input-table" value="1000000" oninput="updateAll()"></td>
@@ -313,7 +302,7 @@
                             <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
-                                <input type="text" class="item-name input-table" value="Cicilan KPR">
+                                <input type="text" class="item-name input-table" value="Cicilan KPR" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
                             <td><input type="number" class="plan input-table" value="1500000" oninput="updateAll()"></td>
@@ -342,7 +331,7 @@
                             <td class="col-num item-index">1</td>
                             <td style="text-align:center;"><input type="checkbox" class="check-status" checked onchange="toggleRowStatus(this)"></td>
                             <td>
-                                <input type="text" class="item-name input-table" value="Makan Bulanan">
+                                <input type="text" class="item-name input-table" value="Makan Bulanan" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
                             <td><input type="number" class="plan input-table" value="2000000" oninput="updateAll()"></td>
@@ -372,7 +361,7 @@
         </div>
         
         <div class="action-group">
-            <button class="btn-main btn-save" onclick="saveDataLocal()">Simpan Data</button>
+            <button class="btn-main btn-save" onclick="manualSave()">Simpan Data</button>
             <button class="btn-main btn-submit" onclick="submitAndEmail()">Submit & Kirim Email</button>
         </div>
     </div>
@@ -385,7 +374,6 @@
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
     }
 
-    // Fungsi refresh nomor indeks/urut tabel agar berurutan secara dinamis
     function refreshRowIndices(tableId, classSelector) {
         const rows = document.querySelectorAll(`#${tableId} tbody .${classSelector}`);
         rows.forEach((td, index) => {
@@ -396,7 +384,7 @@
     function toggleRowStatus(checkbox) {
         const row = checkbox.parentNode.parentNode;
         const actualInput = row.querySelector('.actual');
-        const badgeContainer = row.cells[2]; // Bergeser ke cell indeks 2 karena cell 0 diambil nomor urut
+        const badgeContainer = row.cells[2];
         
         const oldBadge = badgeContainer.querySelector('.badge-status');
         if (oldBadge) oldBadge.remove();
@@ -420,15 +408,15 @@
         updateAll();
     }
 
-    function addIncomeRow() {
+    function addIncomeRow(name = "", value = 0) {
         const table = document.getElementById('table-pemasukan').getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
         const row = table.insertRow(rowCount - 1);
 
         row.innerHTML = `
             <td class="col-num income-index"></td>
-            <td><input type="text" class="input-table" placeholder="Sumber lain..."></td>
-            <td><input type="number" class="income-value input-table" value="0" oninput="updateAll()"></td>
+            <td><input type="text" class="income-name input-table" placeholder="Sumber lain..." value="${name}" oninput="updateAll()"></td>
+            <td><input type="number" class="income-value input-table" value="${value}" oninput="updateAll()"></td>
             <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
         `;
         updateAll();
@@ -452,21 +440,22 @@
         return totalGaji;
     }
 
-    function addRow(tableId) {
+    function addRow(tableId, name = "", plan = 0, actual = 0, checked = false) {
         const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
         const row = table.insertRow(rowCount - 1);
-        row.className = 'row-unpaid';
+        
+        row.className = checked ? 'row-paid' : 'row-unpaid';
 
         row.innerHTML = `
             <td class="col-num item-index"></td>
-            <td style="text-align:center;"><input type="checkbox" class="check-status" onchange="toggleRowStatus(this)"></td>
+            <td style="text-align:center;"><input type="checkbox" class="check-status" ${checked ? 'checked' : ''} onchange="toggleRowStatus(this)"></td>
             <td>
-                <input type="text" class="item-name input-table" placeholder="Nama item...">
-                <span class="badge-status badge-unpaid">Belum Bayar</span>
+                <input type="text" class="item-name input-table" placeholder="Nama item..." value="${name}" oninput="updateAll()">
+                <span class="badge-status ${checked ? 'badge-paid' : 'badge-unpaid'}">${checked ? 'Sudah Bayar' : 'Belum Bayar'}</span>
             </td>
-            <td><input type="number" class="plan input-table" value="0" oninput="updateAll()"></td>
-            <td><input type="number" class="actual input-table" value="0" disabled oninput="updateAll()"></td>
+            <td><input type="number" class="plan input-table" value="${plan}" oninput="updateAll()"></td>
+            <td><input type="number" class="actual input-table" value="${actual}" ${checked ? '' : 'disabled'} oninput="updateAll()"></td>
             <td class="delta">Rp 0</td>
             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
         `;
@@ -571,10 +560,85 @@
         summaryDeltaCell.className = grandDelta >= 0 ? "delta-positive" : "delta-negative";
 
         updateChart(actKebaikan, actMasaDepan, actUtang, actKebutuhan);
+        autoSaveData();
     }
 
-    function saveDataLocal() {
-        alert("Data berhasil disimpan di peramban (Local Storage)!");
+    // Fungsi Penyimpanan Otomatis (Auto-Save)
+    function autoSaveData() {
+        const dataFinansial = {
+            pemasukan: [],
+            kebaikan: [],
+            masadepan: [],
+            utang: [],
+            kebutuhan: []
+        };
+
+        // Ambil data Pemasukan
+        document.querySelectorAll('#table-pemasukan tbody tr:not(.total-row)').forEach(row => {
+            dataFinansial.pemasukan.push({
+                nama: row.querySelector('.income-name').value,
+                nominal: row.querySelector('.income-value').value
+            });
+        });
+
+        const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
+        kategoriIds.forEach(kat => {
+            document.querySelectorAll(`#table-${kat} tbody tr:not(.total-row)`).forEach(row => {
+                dataFinansial[kat].push({
+                    nama: row.querySelector('.item-name').value,
+                    plan: row.querySelector('.plan').value,
+                    actual: row.querySelector('.actual').value,
+                    checked: row.querySelector('.check-status').checked
+                });
+            });
+        });
+
+        localStorage.setItem('kalkulatorFinansialData', JSON.stringify(dataFinansial));
+    }
+
+    function manualSave() {
+        autoSaveData();
+        alert("Data berhasil disimpan di peramban Anda (Local Storage)!");
+    }
+
+    // Fungsi Muat Data Saat Browser Terbuka
+    function loadSavedData() {
+        const savedData = localStorage.getItem('kalkulatorFinansialData');
+        if (!savedData) {
+            updateAll();
+            return;
+        }
+
+        const data = JSON.parse(savedData);
+
+        // Bersihkan data default bawaan HTML
+        document.querySelector('#table-pemasukan tbody').innerHTML = `<tr class="total-row"><td></td><td>Total Pemasukan Bersih</td><td id="total-gaji-label" colspan="2">Rp 0</td></tr>`;
+        const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
+        kategoriIds.forEach(kat => {
+            document.querySelector(`#table-${kat} tbody`).innerHTML = `<tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>`;
+        });
+
+        // Rekonstruksi Baris Pemasukan
+        if (data.pemasukan && data.pemasukan.length > 0) {
+            data.pemasukan.forEach(inc => addIncomeRow(inc.nama, inc.nominal));
+        } else {
+            addIncomeRow("Gaji Pokok", 5000000);
+        }
+
+        // Rekonstruksi Baris Tiap Kategori
+        kategoriIds.forEach(kat => {
+            if (data[kat] && data[kat].length > 0) {
+                data[kat].forEach(item => addRow(`table-${kat}`, item.nama, item.plan, item.actual, item.checked));
+            } else {
+                // Berikan item default jika kosong
+                if (kat === 'kebaikan') addRow('table-kebaikan', 'Zakat / Perpuluhan', 250000, 250000, true);
+                if (kat === 'masadepan') addRow('table-masadepan', 'Tabungan', 1000000, 1000000, true);
+                if (kat === 'utang') addRow('table-utang', 'Cicilan KPR', 1500000, 1500000, true);
+                if (kat === 'kebutuhan') addRow('table-kebutuhan', 'Makan Bulanan', 2000000, 1800000, true);
+            }
+        });
+
+        updateAll();
     }
 
     function ambilDataKategoriTeks(tableId, namaKategori) {
@@ -616,7 +680,7 @@
     }
 
     window.onload = function() {
-        updateAll();
+        loadSavedData();
     };
 </script>
 
