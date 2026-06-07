@@ -236,7 +236,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
@@ -566,10 +566,110 @@
             });
         });
 
-        // Simpan menggunakan Key khusus Bulan-Tahun terpilih
         localStorage.setItem(getStorageKey(), JSON.stringify(dataFinansial));
     }
 
+    // --- BAGIAN YANG TADI TERPOTONG SEKARANG SUDAH UTUH ---
     function manualSave() {
         autoSaveData();
-        const bulanLabel = document.getElementById('select-bulan').options
+        const bulanLabel = document.getElementById('select-bulan').options[document.getElementById('select-bulan').selectedIndex].text;
+        const tahunLabel = document.getElementById('input-tahun').value;
+        alert(`Data untuk periode ${bulanLabel} ${tahunLabel} berhasil disimpan!`);
+    }
+
+    function loadSavedData() {
+        const key = getStorageKey();
+        const savedData = localStorage.getItem(key);
+
+        document.querySelector('#table-pemasukan tbody').innerHTML = `<tr class="total-row"><td></td><td>Total Pemasukan Bersih</td><td id="total-gaji-label" colspan="2">Rp 0</td></tr>`;
+        
+        const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
+        kategoriIds.forEach(kat => {
+            document.querySelector(`#table-${kat} tbody`).innerHTML = `<tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>`;
+        });
+
+        if (!savedData) {
+            addIncomeRow("Gaji Pokok", 5000000);
+            addRow('table-kebaikan', 'Zakat / Perpuluhan', 250000, 250000, true);
+            addRow('table-masadepan', 'Tabungan', 1000000, 1000000, true);
+            addRow('table-utang', 'Cicilan KPR', 1500000, 1500000, true);
+            addRow('table-kebutuhan', 'Makan Bulanan', 2000000, 1800000, true);
+            updateAll();
+            return;
+        }
+
+        try {
+            const data = JSON.parse(savedData);
+
+            if (data.pemasukan && data.pemasukan.length > 0) {
+                data.pemasukan.forEach(inc => addIncomeRow(inc.nama, inc.nominal));
+            } else {
+                addIncomeRow("Gaji Pokok", 5000000);
+            }
+
+            kategoriIds.forEach(kat => {
+                if (data[kat] && data[kat].length > 0) {
+                    data[kat].forEach(item => addRow(`table-${kat}`, item.nama, item.plan, item.actual, item.checked));
+                }
+            });
+        } catch (e) {
+            console.error("Gagal memuat data riwayat lokal:", e);
+        }
+
+        updateAll();
+    }
+
+    function ambilDataKategoriTeks(tableId, namaKategori) {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr:not(.total-row)`);
+        let teks = `\n[Kategori ${namaKategori}]\n`;
+        rows.forEach((row, index) => {
+            const nama = row.querySelector('.item-name').value || "Tanpa Nama";
+            const plan = row.querySelector('.plan').value || 0;
+            const actual = row.querySelector('.actual').value || 0;
+            const isPaid = row.querySelector('.check-status').checked ? "[SUDAH BAYAR]" : "[BELUM BAYAR]";
+            teks += `${index + 1}. ${nama} : Plan Rp ${parseInt(plan).toLocaleString('id-ID')} | Actual Rp ${parseInt(actual).toLocaleString('id-ID')} ${isPaid}\n`;
+        });
+        return teks;
+    }
+
+    function submitAndEmail() {
+        const totalGaji = document.getElementById('summary-pemasukan').innerText;
+        const totalPengeluaran = document.getElementById('summary-pengeluaran').innerText;
+        const sisaDana = document.getElementById('summary-delta').innerText;
+        const bulanLabel = document.getElementById('select-bulan').options[document.getElementById('select-bulan').selectedIndex].text;
+        const tahunLabel = document.getElementById('input-tahun').value;
+
+        const emailSubject = encodeURIComponent(`Laporan Transaksi Periode ${bulanLabel} ${tahunLabel}`);
+        
+        let emailBody = `Halo, berikut adalah rincian laporan pengeluaran aktual Periode ${bulanLabel} ${tahunLabel}:\n\n`;
+        emailBody += `===========================================\n`;
+        emailBody += `TOTAL PEMASUKAN          : ${totalGaji}\n`;
+        emailBody += `TOTAL PENGELUARAN AKTUAL : ${totalPengeluaran}\n`;
+        emailBody += `SISA DANA BERSIH         : ${sisaDana}\n`;
+        emailBody += `===========================================\n`;
+        
+        emailBody += ambilDataKategoriTeks('table-kebaikan', 'Kebaikan (10%)');
+        emailBody += ambilDataKategoriTeks('table-masadepan', 'Masa Depan (20%)');
+        emailBody += ambilDataKategoriTeks('table-utang', 'Utang (30%)');
+        emailBody += ambilDataKategoriTeks('table-kebutuhan', 'Kebutuhan (40%)');
+
+        emailBody += `\nDiproses via Kalkulator Finansial Pro Max Tracker.`;
+        
+        const mailtoLink = `mailto:?subject=${emailSubject}&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoLink;
+    }
+
+    window.onload = function() {
+        const tanggalSekarang = new Date();
+        const bulanSekarang = String(tanggalSekarang.getMonth() + 1).padStart(2, '0');
+        const tahunSekarang = tanggalSekarang.getFullYear();
+        
+        document.getElementById('select-bulan').value = bulanSekarang;
+        document.getElementById('input-tahun').value = tahunSekarang;
+
+        loadSavedData();
+    };
+</script>
+
+</body>
+</html>
