@@ -210,7 +210,7 @@
                     <tr>
                         <td class="col-num income-index">1</td>
                         <td><input type="text" class="income-name input-table" value="Gaji Pokok" oninput="updateAll()"></td>
-                        <td><input type="number" class="income-value input-table" value="5000000" oninput="updateAll()"></td>
+                        <td><input type="number" class="income-value input-table" value="5000000" min="0" oninput="updateAll()"></td>
                         <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
                     </tr>
                     <tr class="total-row">
@@ -247,8 +247,8 @@
                                 <input type="text" class="item-name input-table" value="Zakat / Perpuluhan" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
-                            <td><input type="number" class="plan input-table" value="250000" oninput="updateAll()"></td>
-                            <td><input type="number" class="actual input-table" value="250000" oninput="updateAll()"></td>
+                            <td><input type="number" class="plan input-table" value="250000" min="0" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="250000" min="0" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
@@ -276,8 +276,8 @@
                                 <input type="text" class="item-name input-table" value="Tabungan" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
-                            <td><input type="number" class="plan input-table" value="1000000" oninput="updateAll()"></td>
-                            <td><input type="number" class="actual input-table" value="1000000" oninput="updateAll()"></td>
+                            <td><input type="number" class="plan input-table" value="1000000" min="0" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="1000000" min="0" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
@@ -305,8 +305,8 @@
                                 <input type="text" class="item-name input-table" value="Cicilan KPR" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
-                            <td><input type="number" class="plan input-table" value="1500000" oninput="updateAll()"></td>
-                            <td><input type="number" class="actual input-table" value="1500000" oninput="updateAll()"></td>
+                            <td><input type="number" class="plan input-table" value="1500000" min="0" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="1500000" min="0" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
@@ -334,8 +334,8 @@
                                 <input type="text" class="item-name input-table" value="Makan Bulanan" oninput="updateAll()">
                                 <span class="badge-status badge-paid">Sudah Bayar</span>
                             </td>
-                            <td><input type="number" class="plan input-table" value="2000000" oninput="updateAll()"></td>
-                            <td><input type="number" class="actual input-table" value="1800000" oninput="updateAll()"></td>
+                            <td><input type="number" class="plan input-table" value="2000000" min="0" oninput="updateAll()"></td>
+                            <td><input type="number" class="actual input-table" value="1800000" min="0" oninput="updateAll()"></td>
                             <td class="delta">Rp 0</td>
                             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
                         </tr>
@@ -395,6 +395,9 @@
         if (checkbox.checked) {
             row.className = 'row-paid';
             actualInput.disabled = false;
+            // Kembalikan nilai plan jika di-check ulang agar tidak bernilai 0 berkelanjutan
+            const planVal = row.querySelector('.plan').value;
+            actualInput.value = actualInput.value == 0 ? planVal : actualInput.value;
             badge.classList.add('badge-paid');
             badge.innerText = 'Sudah Bayar';
         } else {
@@ -416,7 +419,7 @@
         row.innerHTML = `
             <td class="col-num income-index"></td>
             <td><input type="text" class="income-name input-table" placeholder="Sumber lain..." value="${name}" oninput="updateAll()"></td>
-            <td><input type="number" class="income-value input-table" value="${value}" oninput="updateAll()"></td>
+            <td><input type="number" class="income-value input-table" value="${value}" min="0" oninput="updateAll()"></td>
             <td><button class="btn-delete" onclick="deleteIncomeRow(this)">Hapus</button></td>
         `;
         updateAll();
@@ -454,8 +457,8 @@
                 <input type="text" class="item-name input-table" placeholder="Nama item..." value="${name}" oninput="updateAll()">
                 <span class="badge-status ${checked ? 'badge-paid' : 'badge-unpaid'}">${checked ? 'Sudah Bayar' : 'Belum Bayar'}</span>
             </td>
-            <td><input type="number" class="plan input-table" value="${plan}" oninput="updateAll()"></td>
-            <td><input type="number" class="actual input-table" value="${actual}" ${checked ? '' : 'disabled'} oninput="updateAll()"></td>
+            <td><input type="number" class="plan input-table" value="${plan}" min="0" oninput="updateAll()"></td>
+            <td><input type="number" class="actual input-table" value="${actual}" min="0" ${checked ? '' : 'disabled'} oninput="updateAll()"></td>
             <td class="delta">Rp 0</td>
             <td><button class="btn-delete" onclick="deleteRow(this)">Hapus</button></td>
         `;
@@ -563,7 +566,6 @@
         autoSaveData();
     }
 
-    // Fungsi Penyimpanan Otomatis (Auto-Save)
     function autoSaveData() {
         const dataFinansial = {
             pemasukan: [],
@@ -573,23 +575,33 @@
             kebutuhan: []
         };
 
-        // Ambil data Pemasukan
         document.querySelectorAll('#table-pemasukan tbody tr:not(.total-row)').forEach(row => {
-            dataFinansial.pemasukan.push({
-                nama: row.querySelector('.income-name').value,
-                nominal: row.querySelector('.income-value').value
-            });
+            const nameInput = row.querySelector('.income-name');
+            const valueInput = row.querySelector('.income-value');
+            if (nameInput && valueInput) {
+                dataFinansial.pemasukan.push({
+                    nama: nameInput.value,
+                    nominal: valueInput.value
+                });
+            }
         });
 
         const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
         kategoriIds.forEach(kat => {
             document.querySelectorAll(`#table-${kat} tbody tr:not(.total-row)`).forEach(row => {
-                dataFinansial[kat].push({
-                    nama: row.querySelector('.item-name').value,
-                    plan: row.querySelector('.plan').value,
-                    actual: row.querySelector('.actual').value,
-                    checked: row.querySelector('.check-status').checked
-                });
+                const nameInput = row.querySelector('.item-name');
+                const planInput = row.querySelector('.plan');
+                const actualInput = row.querySelector('.actual');
+                const checkInput = row.querySelector('.check-status');
+                
+                if (nameInput && planInput && actualInput && checkInput) {
+                    dataFinansial[kat].push({
+                        nama: nameInput.value,
+                        plan: planInput.value,
+                        actual: actualInput.value,
+                        checked: checkInput.checked
+                    });
+                }
             });
         });
 
@@ -601,7 +613,6 @@
         alert("Data berhasil disimpan di peramban Anda (Local Storage)!");
     }
 
-    // Fungsi Muat Data Saat Browser Terbuka
     function loadSavedData() {
         const savedData = localStorage.getItem('kalkulatorFinansialData');
         if (!savedData) {
@@ -609,34 +620,34 @@
             return;
         }
 
-        const data = JSON.parse(savedData);
+        try {
+            const data = JSON.parse(savedData);
 
-        // Bersihkan data default bawaan HTML
-        document.querySelector('#table-pemasukan tbody').innerHTML = `<tr class="total-row"><td></td><td>Total Pemasukan Bersih</td><td id="total-gaji-label" colspan="2">Rp 0</td></tr>`;
-        const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
-        kategoriIds.forEach(kat => {
-            document.querySelector(`#table-${kat} tbody`).innerHTML = `<tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>`;
-        });
+            document.querySelector('#table-pemasukan tbody').innerHTML = `<tr class="total-row"><td></td><td>Total Pemasukan Bersih</td><td id="total-gaji-label" colspan="2">Rp 0</td></tr>`;
+            const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
+            kategoriIds.forEach(kat => {
+                document.querySelector(`#table-${kat} tbody`).innerHTML = `<tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>`;
+            });
 
-        // Rekonstruksi Baris Pemasukan
-        if (data.pemasukan && data.pemasukan.length > 0) {
-            data.pemasukan.forEach(inc => addIncomeRow(inc.nama, inc.nominal));
-        } else {
-            addIncomeRow("Gaji Pokok", 5000000);
-        }
-
-        // Rekonstruksi Baris Tiap Kategori
-        kategoriIds.forEach(kat => {
-            if (data[kat] && data[kat].length > 0) {
-                data[kat].forEach(item => addRow(`table-${kat}`, item.nama, item.plan, item.actual, item.checked));
+            if (data.pemasukan && data.pemasukan.length > 0) {
+                data.pemasukan.forEach(inc => addIncomeRow(inc.nama, inc.nominal));
             } else {
-                // Berikan item default jika kosong
-                if (kat === 'kebaikan') addRow('table-kebaikan', 'Zakat / Perpuluhan', 250000, 250000, true);
-                if (kat === 'masadepan') addRow('table-masadepan', 'Tabungan', 1000000, 1000000, true);
-                if (kat === 'utang') addRow('table-utang', 'Cicilan KPR', 1500000, 1500000, true);
-                if (kat === 'kebutuhan') addRow('table-kebutuhan', 'Makan Bulanan', 2000000, 1800000, true);
+                addIncomeRow("Gaji Pokok", 5000000);
             }
-        });
+
+            kategoriIds.forEach(kat => {
+                if (data[kat] && data[kat].length > 0) {
+                    data[kat].forEach(item => addRow(`table-${kat}`, item.nama, item.plan, item.actual, item.checked));
+                } else {
+                    if (kat === 'kebaikan') addRow('table-kebaikan', 'Zakat / Perpuluhan', 250000, 250000, true);
+                    if (kat === 'masadepan') addRow('table-masadepan', 'Tabungan', 1000000, 1000000, true);
+                    if (kat === 'utang') addRow('table-utang', 'Cicilan KPR', 1500000, 1500000, true);
+                    if (kat === 'kebutuhan') addRow('table-kebutuhan', 'Makan Bulanan', 2000000, 1800000, true);
+                }
+            });
+        } catch (e) {
+            console.error("Gagal memuat data lokal:", e);
+        }
 
         updateAll();
     }
