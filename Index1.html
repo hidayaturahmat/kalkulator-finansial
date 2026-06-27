@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalkulator Finansial 10/20/30/40</title>
+    <title>Kalkulator Finansial 10/20/30/40 dengan Login</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,6 +24,39 @@
             text-align: center;
             color: #2c3e50;
         }
+        .auth-box {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        .auth-box button, .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .auth-box button:hover { background-color: #2980b9; }
+        .logout-btn { background-color: #e74c3c; width: auto; float: right; padding: 8px 15px; font-size: 14px; }
+        .logout-btn:hover { background-color: #c0392b; }
+        
         .input-section {
             display: flex;
             justify-content: center;
@@ -50,10 +83,6 @@
             border: 2px solid #ddd;
             border-radius: 8px;
             outline: none;
-            transition: 0.3s;
-        }
-        input[type="number"]:focus, input[type="date"]:focus {
-            border-color: #3498db;
         }
         .grid-dashboard {
             display: grid;
@@ -67,7 +96,6 @@
             padding: 20px;
             border-radius: 10px;
             color: white;
-            position: relative;
         }
         .kebaikan { background-color: #17a2b8; }
         .masa-depan { background-color: #20c997; }
@@ -78,11 +106,26 @@
         .amount { font-size: 24px; font-weight: bold; margin: 10px 0; }
         .date-info { font-size: 13px; font-style: italic; margin-bottom: 12px; opacity: 0.95; font-weight: 500; }
         ul { padding-left: 20px; margin-bottom: 0; font-size: 14px; }
+        .hidden { display: none !important; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #eee; padding: 10px 15px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="auth-container" class="auth-box">
+    <h2 id="auth-title">Masuk Akun</h2>
+    <input type="email" id="auth-email" placeholder="Email Anda">
+    <input type="password" id="auth-password" placeholder="Password (Minimal 6 Karakter)">
+    <button id="btn-primary" onclick="handleAuth()">Masuk</button>
+    <p id="auth-toggle" style="margin-top:15px; font-size:14px; cursor:pointer; color:#3498db;" onclick="toggleAuthMode()">Belum punya akun? Daftar di sini</p>
+</div>
+
+<div id="app-container" class="container hidden">
+    <div class="user-info">
+        <span>Login sebagai: <strong id="user-display">-</strong></span>
+        <button class="logout-btn" onclick="logout()">Keluar</button>
+    </div>
+    
     <h1>Prinsip 10/20/30/40</h1>
     <h2>Pengelolaan Penghasilan</h2>
     
@@ -145,46 +188,121 @@
     </div>
 </div>
 
-<script>
-    // Mengeset default input tanggal ke hari ini saat halaman dibuka
-    document.getElementById('tanggal_bayar').valueAsDate = new Date();
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    function formatRupiah(angka) {
-        return "Rp " + angka.toLocaleString('id-ID');
-    }
+  // ⚠️ PASTE KONFIGURASI FIREBASE ANDA DI SINI
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
 
-    function formatTanggal(tanggalStr) {
-        if (!tanggalStr) return "-";
-        const opsi = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(tanggalStr).toLocaleDateString('id-ID', opsi);
-    }
+  // Inisialisasi Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    function hitungFinansial() {
-        const gaji = parseFloat(document.getElementById('gaji').value) || 0;
-        const tanggalBayar = document.getElementById('tanggal_bayar').value;
-        const tanggalFormat = formatTanggal(tanggalBayar);
+  let isLoginMode = true;
 
-        // Hitung Alokasi Dana
-        const kebaikan = gaji * 0.10;
-        const masadepan = gaji * 0.20;
-        const utang = gaji * 0.30;
-        const kebutuhan = gaji * 0.40;
+  // Pindah Mode Login / Register
+  window.toggleAuthMode = function() {
+      isLoginMode = !isLoginMode;
+      document.getElementById('auth-title').innerText = isLoginMode ? "Masuk Akun" : "Daftar Akun Baru";
+      document.getElementById('btn-primary').innerText = isLoginMode ? "Masuk" : "Daftar";
+      document.getElementById('auth-toggle').innerText = isLoginMode ? "Belum punya akun? Daftar di sini" : "Sudah punya akun? Masuk di sini";
+  }
 
-        // Tampilkan Nominal Uang ke UI
-        document.getElementById('txt-kebaikan').innerText = formatRupiah(kebaikan);
-        document.getElementById('txt-masadepan').innerText = formatRupiah(masadepan);
-        document.getElementById('txt-utang').innerText = formatRupiah(utang);
-        document.getElementById('txt-kebutuhan').innerText = formatRupiah(kebutuhan);
+  // Eksekusi Login atau Register
+  window.handleAuth = function() {
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
 
-        // Tampilkan Informasi Tanggal Pembayaran ke UI
-        document.getElementById('date-kebaikan').innerText = "Tanggal Bayar: " + tanggalFormat;
-        document.getElementById('date-masadepan').innerText = "Tanggal Bayar: " + tanggalFormat;
-        document.getElementById('date-utang').innerText = "Tanggal Bayar: " + tanggalFormat;
-        document.getElementById('date-kebutuhan').innerText = "Tanggal Bayar: " + tanggalFormat;
-    }
+      if(!email || !password) return alert("Harap isi semua kolom!");
 
-    // Jalankan kalkulasi di awal untuk memuat tanggal default
-    hitungFinansial();
+      if (isLoginMode) {
+          signInWithEmailAndPassword(auth, email, password)
+            .catch(error => alert("Gagal Masuk: " + error.message));
+      } else {
+          createUserWithEmailAndPassword(auth, email, password)
+            .then(() => alert("Akun berhasil didaftarkan!"))
+            .catch(error => alert("Gagal Daftar: " + error.message));
+      }
+  }
+
+  // Fungsi Logout
+  window.logout = function() {
+      signOut(auth);
+  }
+
+  // Memantau Status Login User (Paling Penting untuk Hak Akses)
+  onAuthStateChanged(auth, (user) => {
+      if (user) {
+          // Jika user berhasil login
+          document.getElementById('auth-container').classList.add('hidden');
+          document.getElementById('app-container').classList.remove('hidden');
+          document.getElementById('user-display').innerText = user.email;
+          
+          // Memuat data spesifik user dari LocalStorage (Bisa diganti ke Firestore jika mau cloud)
+          const savedData = JSON.parse(localStorage.getItem(`finansial_${user.uid}`));
+          if (savedData) {
+              document.getElementById('gaji').value = savedData.gaji;
+              document.getElementById('tanggal_bayar').value = savedData.tanggal;
+          } else {
+              document.getElementById('gaji').value = "";
+              document.getElementById('tanggal_bayar').valueAsDate = new Date();
+          }
+          hitungFinansial();
+      } else {
+          // Jika user logout / belum login
+          document.getElementById('auth-container').classList.remove('hidden');
+          document.getElementById('app-container').classList.add('hidden');
+      }
+  });
+
+  // Fungsi Hitung Finansial & Auto Simpan Data per User
+  window.hitungFinansial = function() {
+      const gaji = parseFloat(document.getElementById('gaji').value) || 0;
+      const tanggalBayar = document.getElementById('tanggal_bayar').value;
+      const tanggalFormat = formatTanggal(tanggalBayar);
+
+      // Hitung Alokasi
+      const kebaikan = gaji * 0.10;
+      const masadepan = gaji * 0.20;
+      const utang = gaji * 0.30;
+      const kebutuhan = gaji * 0.40;
+
+      // Tampilkan ke UI
+      document.getElementById('txt-kebaikan').innerText = formatRupiah(kebaikan);
+      document.getElementById('txt-masadepan').innerText = formatRupiah(masadepan);
+      document.getElementById('txt-utang').innerText = formatRupiah(utang);
+      document.getElementById('txt-kebutuhan').innerText = formatRupiah(kebutuhan);
+
+      document.getElementById('date-kebaikan').innerText = "Tanggal Bayar: " + tanggalFormat;
+      document.getElementById('date-masadepan').innerText = "Tanggal Bayar: " + tanggalFormat;
+      document.getElementById('date-utang').innerText = "Tanggal Bayar: " + tanggalFormat;
+      document.getElementById('date-kebutuhan').innerText = "Tanggal Bayar: " + tanggalFormat;
+
+      // SIMPAN DATA KHUSUS USER YANG SEDANG LOGIN
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+          const dataToSave = { gaji: gaji, tanggal: tanggalBayar };
+          localStorage.setItem(`finansial_${currentUser.uid}`, JSON.stringify(dataToSave));
+      }
+  }
+
+  function formatRupiah(angka) {
+      return "Rp " + angka.toLocaleString('id-ID');
+  }
+
+  function formatTanggal(tanggalStr) {
+      if (!tanggalStr) return "-";
+      const opsi = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(tanggalStr).toLocaleDateString('id-ID', opsi);
+  }
 </script>
 
 </body>
