@@ -14,7 +14,7 @@
             color: #333;
         }
         .container {
-            max-width: 950px;
+            max-width: 1050px;
             margin: 0 auto;
             background: white;
             padding: 25px;
@@ -62,7 +62,7 @@
             grid-template-columns: 1fr;
             gap: 25px;
         }
-        @media(min-width: 768px) {
+        @media(min-width: 992px) {
             .grid-dashboard { grid-template-columns: 1fr 1fr; }
         }
         .category-block {
@@ -255,7 +255,7 @@
             <div class="category-body">
                 <table id="table-kebaikan">
                     <thead>
-                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th style="width:18%">Tanggal</th><th>Item Pengeluaran</th><th style="width:18%">Plan (Rp)</th><th style="width:18%">Actual (Rp)</th><th style="width:18%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -270,7 +270,7 @@
             <div class="category-body">
                 <table id="table-masadepan">
                     <thead>
-                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th style="width:18%">Tanggal</th><th>Item Pengeluaran</th><th style="width:18%">Plan (Rp)</th><th style="width:18%">Actual (Rp)</th><th style="width:18%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -285,7 +285,7 @@
             <div class="category-body">
                 <table id="table-utang">
                     <thead>
-                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th style="width:18%">Tanggal</th><th>Item Pengeluaran</th><th style="width:18%">Plan (Rp)</th><th style="width:18%">Actual (Rp)</th><th style="width:18%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -300,7 +300,7 @@
             <div class="category-body">
                 <table id="table-kebutuhan">
                     <thead>
-                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th>Item Pengeluaran</th><th style="width:22%">Plan (Rp)</th><th style="width:22%">Actual (Rp)</th><th style="width:22%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
+                        <tr><th style="width: 4%;">#</th><th style="width:5%">Bayar</th><th style="width:18%">Tanggal</th><th>Item Pengeluaran</th><th style="width:18%">Plan (Rp)</th><th style="width:18%">Actual (Rp)</th><th style="width:18%">Delta (Rp)</th><th style="width:8%">Aksi</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -332,7 +332,6 @@
 <script>
     let myChart;
 
-    // Mendapatkan Key Storage Unik berdasarkan Bulan & Tahun Terpilih
     function getStorageKey() {
         const bulan = document.getElementById('select-bulan').value;
         const tahun = document.getElementById('input-tahun').value || '2026';
@@ -343,6 +342,12 @@
         return "Rp " + Math.abs(angka).toLocaleString('id-ID');
     }
 
+    function formatTanggalIndo(tanggalStr) {
+        if (!tanggalStr) return "-";
+        const opsi = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(tanggalStr).toLocaleDateString('id-ID', opsi);
+    }
+
     function refreshRowIndices(tableId, classSelector) {
         const rows = document.querySelectorAll(`#${tableId} tbody .${classSelector}`);
         rows.forEach((td, index) => { td.innerText = index + 1; });
@@ -351,7 +356,7 @@
     function toggleRowStatus(checkbox) {
         const row = checkbox.parentNode.parentNode;
         const actualInput = row.querySelector('.actual');
-        const badgeContainer = row.cells[2];
+        const badgeContainer = row.cells[3]; // Indeks digeser karena kolom tanggal ditambahkan
         
         const oldBadge = badgeContainer.querySelector('.badge-status');
         if (oldBadge) oldBadge.remove();
@@ -407,16 +412,24 @@
         return totalGaji;
     }
 
-    function addRow(tableId, name = "", plan = 0, actual = 0, checked = false) {
+    function addRow(tableId, name = "", plan = 0, actual = 0, checked = false, tanggal = "") {
         const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
         const rowCount = table.rows.length;
         const row = table.insertRow(rowCount - 1);
         
         row.className = checked ? 'row-paid' : 'row-unpaid';
 
+        // Jika data baru dibuat tanpa parameter tanggal, isi dengan tanggal hari ini
+        if (!tanggal && !checked) {
+            tanggal = "";
+        } else if (!tanggal) {
+            tanggal = new Date().toISOString().split('T')[0];
+        }
+
         row.innerHTML = `
             <td class="col-num item-index"></td>
             <td style="text-align:center;"><input type="checkbox" class="check-status" ${checked ? 'checked' : ''} onchange="toggleRowStatus(this)"></td>
+            <td><input type="date" class="item-date input-table" value="${tanggal}" onchange="updateAll()"></td>
             <td>
                 <input type="text" class="item-name input-table" placeholder="Nama item..." value="${name}" oninput="updateAll()">
                 <span class="badge-status ${checked ? 'badge-paid' : 'badge-unpaid'}">${checked ? 'Sudah Bayar' : 'Belum Bayar'}</span>
@@ -550,6 +563,7 @@
         const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
         kategoriIds.forEach(kat => {
             document.querySelectorAll(`#table-${kat} tbody tr:not(.total-row)`).forEach(row => {
+                const dateInput = row.querySelector('.item-date');
                 const nameInput = row.querySelector('.item-name');
                 const planInput = row.querySelector('.plan');
                 const actualInput = row.querySelector('.actual');
@@ -557,6 +571,7 @@
                 
                 if (nameInput && planInput && actualInput && checkInput) {
                     dataFinansial[kat].push({
+                        tanggal: dateInput.value,
                         nama: nameInput.value,
                         plan: planInput.value,
                         actual: actualInput.value,
@@ -569,7 +584,6 @@
         localStorage.setItem(getStorageKey(), JSON.stringify(dataFinansial));
     }
 
-    // --- BAGIAN YANG TADI TERPOTONG SEKARANG SUDAH UTUH ---
     function manualSave() {
         autoSaveData();
         const bulanLabel = document.getElementById('select-bulan').options[document.getElementById('select-bulan').selectedIndex].text;
@@ -585,15 +599,17 @@
         
         const kategoriIds = ['kebaikan', 'masadepan', 'utang', 'kebutuhan'];
         kategoriIds.forEach(kat => {
-            document.querySelector(`#table-${kat} tbody`).innerHTML = `<tr class="total-row"><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>`;
+            document.querySelector(`#table-${kat} tbody`).innerHTML = `<tr class="total-row"><td></td><td></td><td></td><td>Total</td><td class="total-plan">0</td><td class="total-actual">0</td><td class="total-delta">0</td><td></td></tr>`;
         });
+
+        const hariIni = new Date().toISOString().split('T')[0];
 
         if (!savedData) {
             addIncomeRow("Gaji Pokok", 5000000);
-            addRow('table-kebaikan', 'Zakat / Perpuluhan', 250000, 250000, true);
-            addRow('table-masadepan', 'Tabungan', 1000000, 1000000, true);
-            addRow('table-utang', 'Cicilan KPR', 1500000, 1500000, true);
-            addRow('table-kebutuhan', 'Makan Bulanan', 2000000, 1800000, true);
+            addRow('table-kebaikan', 'Zakat / Perpuluhan', 250000, 250000, true, hariIni);
+            addRow('table-masadepan', 'Tabungan', 1000000, 1000000, true, hariIni);
+            addRow('table-utang', 'Cicilan KPR', 1500000, 1500000, true, hariIni);
+            addRow('table-kebutuhan', 'Makan Bulanan', 2000000, 1800000, true, hariIni);
             updateAll();
             return;
         }
@@ -609,7 +625,7 @@
 
             kategoriIds.forEach(kat => {
                 if (data[kat] && data[kat].length > 0) {
-                    data[kat].forEach(item => addRow(`table-${kat}`, item.nama, item.plan, item.actual, item.checked));
+                    data[kat].forEach(item => addRow(`table-${kat}`, item.nama, item.plan, item.actual, item.checked, item.tanggal));
                 }
             });
         } catch (e) {
@@ -623,11 +639,13 @@
         const rows = document.querySelectorAll(`#${tableId} tbody tr:not(.total-row)`);
         let teks = `\n[Kategori ${namaKategori}]\n`;
         rows.forEach((row, index) => {
+            const tanggalRaw = row.querySelector('.item-date').value;
+            const tanggalFormat = formatTanggalIndo(tanggalRaw);
             const nama = row.querySelector('.item-name').value || "Tanpa Nama";
             const plan = row.querySelector('.plan').value || 0;
             const actual = row.querySelector('.actual').value || 0;
             const isPaid = row.querySelector('.check-status').checked ? "[SUDAH BAYAR]" : "[BELUM BAYAR]";
-            teks += `${index + 1}. ${nama} : Plan Rp ${parseInt(plan).toLocaleString('id-ID')} | Actual Rp ${parseInt(actual).toLocaleString('id-ID')} ${isPaid}\n`;
+            teks += `${index + 1}. Tgl: ${tanggalFormat} | ${nama} : Plan Rp ${parseInt(plan).toLocaleString('id-ID')} | Actual Rp ${parseInt(actual).toLocaleString('id-ID')} ${isPaid}\n`;
         });
         return teks;
     }
