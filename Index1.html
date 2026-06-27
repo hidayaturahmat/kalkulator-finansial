@@ -25,19 +25,34 @@
             color: #2c3e50;
         }
         .input-section {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
-        input[type="number"] {
+        .input-group {
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="date"] {
             padding: 12px;
-            width: 60%;
+            width: 100%;
+            box-sizing: border-box;
             font-size: 16px;
             border: 2px solid #ddd;
             border-radius: 8px;
             outline: none;
             transition: 0.3s;
         }
-        input[type="number"]:focus {
+        input[type="number"]:focus, input[type="date"]:focus {
             border-color: #3498db;
         }
         .grid-dashboard {
@@ -52,6 +67,7 @@
             padding: 20px;
             border-radius: 10px;
             color: white;
+            position: relative;
         }
         .kebaikan { background-color: #17a2b8; }
         .masa-depan { background-color: #20c997; }
@@ -60,6 +76,7 @@
         
         .card h3 { margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 5px; }
         .amount { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .date-info { font-size: 13px; font-style: italic; margin-bottom: 12px; opacity: 0.95; font-weight: 500; }
         ul { padding-left: 20px; margin-bottom: 0; font-size: 14px; }
     </style>
 </head>
@@ -70,14 +87,21 @@
     <h2>Pengelolaan Penghasilan</h2>
     
     <div class="input-section">
-        <label for="gaji" style="display:block; margin-bottom:8px; font-weight:bold;">Masukkan Gaji Bulanan Anda (Rp):</label>
-        <input type="number" id="gaji" placeholder="Contoh: 5000000" oninput="hitungFinansial()">
+        <div class="input-group">
+            <label for="gaji">Masukkan Gaji Bulanan Anda (Rp):</label>
+            <input type="number" id="gaji" placeholder="Contoh: 5000000" oninput="hitungFinansial()">
+        </div>
+        <div class="input-group">
+            <label for="tanggal_bayar">Tanggal Pembayaran / Gajian:</label>
+            <input type="date" id="tanggal_bayar" onchange="hitungFinansial()">
+        </div>
     </div>
 
     <div class="grid-dashboard">
         <div class="card kebaikan">
             <h3>10% - Kebaikan</h3>
             <div class="amount" id="txt-kebaikan">Rp 0</div>
+            <div class="date-info" id="date-kebaikan">Tanggal Bayar: -</div>
             <ul>
                 <li>Zakat / Perpuluhan</li>
                 <li>Dana Sosial & Donasi</li>
@@ -88,6 +112,7 @@
         <div class="card masa-depan">
             <h3>20% - Masa Depan</h3>
             <div class="amount" id="txt-masadepan">Rp 0</div>
+            <div class="date-info" id="date-masadepan">Tanggal Bayar: -</div>
             <ul>
                 <li>Dana Darurat</li>
                 <li>Investasi & Tabungan</li>
@@ -98,6 +123,7 @@
         <div class="card utang">
             <h3>Maksimal 30% - Utang</h3>
             <div class="amount" id="txt-utang">Rp 0</div>
+            <div class="date-info" id="date-utang">Tanggal Bayar: -</div>
             <ul>
                 <li>Cicilan Rumah / Apartemen</li>
                 <li>Cicilan Kendaraan</li>
@@ -108,6 +134,7 @@
         <div class="card kebutuhan">
             <h3>40% - Kebutuhan</h3>
             <div class="amount" id="txt-kebutuhan">Rp 0</div>
+            <div class="date-info" id="date-kebutuhan">Tanggal Bayar: -</div>
             <ul>
                 <li>Biaya Rumah Tangga & Makan</li>
                 <li>Transportasi / Ongkos</li>
@@ -119,25 +146,45 @@
 </div>
 
 <script>
+    // Mengeset default input tanggal ke hari ini saat halaman dibuka
+    document.getElementById('tanggal_bayar').valueAsDate = new Date();
+
     function formatRupiah(angka) {
         return "Rp " + angka.toLocaleString('id-ID');
     }
 
+    function formatTanggal(tanggalStr) {
+        if (!tanggalStr) return "-";
+        const opsi = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(tanggalStr).toLocaleDateString('id-ID', opsi);
+    }
+
     function hitungFinansial() {
         const gaji = parseFloat(document.getElementById('gaji').value) || 0;
+        const tanggalBayar = document.getElementById('tanggal_bayar').value;
+        const tanggalFormat = formatTanggal(tanggalBayar);
 
-        // Hitung Alokasi
+        // Hitung Alokasi Dana
         const kebaikan = gaji * 0.10;
         const masadepan = gaji * 0.20;
         const utang = gaji * 0.30;
         const kebutuhan = gaji * 0.40;
 
-        // Tampilkan ke UI
+        // Tampilkan Nominal Uang ke UI
         document.getElementById('txt-kebaikan').innerText = formatRupiah(kebaikan);
         document.getElementById('txt-masadepan').innerText = formatRupiah(masadepan);
         document.getElementById('txt-utang').innerText = formatRupiah(utang);
         document.getElementById('txt-kebutuhan').innerText = formatRupiah(kebutuhan);
+
+        // Tampilkan Informasi Tanggal Pembayaran ke UI
+        document.getElementById('date-kebaikan').innerText = "Tanggal Bayar: " + tanggalFormat;
+        document.getElementById('date-masadepan').innerText = "Tanggal Bayar: " + tanggalFormat;
+        document.getElementById('date-utang').innerText = "Tanggal Bayar: " + tanggalFormat;
+        document.getElementById('date-kebutuhan').innerText = "Tanggal Bayar: " + tanggalFormat;
     }
+
+    // Jalankan kalkulasi di awal untuk memuat tanggal default
+    hitungFinansial();
 </script>
 
 </body>
