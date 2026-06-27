@@ -189,20 +189,22 @@
 </div>
 
 <script type="module">
+  // 1. Import Firebase Core dan layanan Auth yang dibutuhkan
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  // ⚠️ PASTE KONFIGURASI FIREBASE ANDA DI SINI
+  // 2. Konfigurasi Firebase asli milik Anda
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCWzTq4n77Kp_o1mCx3XXaZBhYgw9z2rqU",
+    authDomain: "kalkulator-financial.firebaseapp.com",
+    projectId: "kalkulator-financial",
+    storageBucket: "kalkulator-financial.firebasestorage.app",
+    messagingSenderId: "43987663671",
+    appId: "1:43987663671:web:a7bf719740797288bf38b2",
+    measurementId: "G-WXEEVKYC5K"
   };
 
-  // Inisialisasi Firebase
+  // 3. Inisialisasi Firebase & Auth
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
@@ -238,7 +240,7 @@
       signOut(auth);
   }
 
-  // Memantau Status Login User (Paling Penting untuk Hak Akses)
+  // Memantau Status Login User
   onAuthStateChanged(auth, (user) => {
       if (user) {
           // Jika user berhasil login
@@ -246,7 +248,7 @@
           document.getElementById('app-container').classList.remove('hidden');
           document.getElementById('user-display').innerText = user.email;
           
-          // Memuat data spesifik user dari LocalStorage (Bisa diganti ke Firestore jika mau cloud)
+          // Memuat data spesifik user dari LocalStorage
           const savedData = JSON.parse(localStorage.getItem(`finansial_${user.uid}`));
           if (savedData) {
               document.getElementById('gaji').value = savedData.gaji;
@@ -286,7 +288,7 @@
       document.getElementById('date-utang').innerText = "Tanggal Bayar: " + tanggalFormat;
       document.getElementById('date-kebutuhan').innerText = "Tanggal Bayar: " + tanggalFormat;
 
-      // SIMPAN DATA KHUSUS USER YANG SEDANG LOGIN
+      // Simpan data privat terikat UID User
       const currentUser = auth.currentUser;
       if (currentUser) {
           const dataToSave = { gaji: gaji, tanggal: tanggalBayar };
